@@ -17,7 +17,7 @@
   --radius:14px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
 
 /* ── BG particles ── */
@@ -54,8 +54,23 @@ body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--text);displ
 .start-btn:active{transform:scale(.98)}
 
 /* ── GAME ── */
-#s-game{background:var(--bg);justify-content:flex-start;padding:12px 12px 20px;overflow:hidden}
-.game-header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:4px 0 10px;flex-shrink:0}
+#s-game{
+  background:var(--bg);
+  justify-content:flex-start;
+  padding:8px 8px 8px;
+  height:100vh;
+  height:100dvh;
+  overflow:hidden;
+}
+.game-header{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 4px 6px;
+  flex-shrink:0;
+  height:48px;
+}
 .gh-player{display:flex;align-items:center;gap:8px}
 .gh-avatar{width:32px;height:32px;border-radius:50%;border:2px solid var(--gold);object-fit:cover}
 .gh-avatar-fb{width:32px;height:32px;border-radius:50%;border:2px solid var(--gold);background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:white}
@@ -68,9 +83,29 @@ body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--text);displ
 .pairs-label{font-size:.6rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase}
 
 /* ── BOARD ── */
-.board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;flex:1;max-height:calc(100vh - 120px)}
-.card{position:relative;cursor:pointer;aspect-ratio:1}
-.card-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.4,0,.2,1)}
+.board{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(4,1fr);
+  gap:8px;
+  width:100%;
+  flex:1;
+  min-height:0;
+  overflow:hidden;
+}
+.card{
+  position:relative;
+  cursor:pointer;
+  min-height:0;
+  min-width:0;
+  overflow:hidden;
+}
+.card-inner{
+  position:absolute;
+  inset:0;
+  transform-style:preserve-3d;
+  transition:transform .45s cubic-bezier(.4,0,.2,1);
+}
 .card.flipped .card-inner{transform:rotateY(180deg)}
 .card.matched .card-inner{transform:rotateY(180deg)}
 .card-face{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -174,7 +209,7 @@ body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--text);displ
       <div class="timer-val" id="timer">00:00</div>
     </div>
     <div class="pairs-info">
-      <div class="pairs-val"><span id="pairs-found">0</span>/8</div>
+      <div class="pairs-val"><span id="pairs-found">0</span>/6</div>
       <div class="pairs-label">คู่</div>
     </div>
   </div>
@@ -235,6 +270,8 @@ const CARD_DATA = [
   { id:8, name:'แบรนด์',       emoji:'💎', imageUrl:'https://drive.google.com/uc?id=1vjztNP2zKiiUZK7p8iz-9YojxIdX4OQF' },
 ];
 
+
+const PAIRS = 6; // จำนวนคู่ต่อเกม (3x4 = 6 คู่)
 // ─────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────
@@ -316,22 +353,25 @@ function fallbackAvatar(name, size) {
 // GAME
 // ─────────────────────────────────────────
 function startGame() {
-  // Reset state
   clearInterval(timerInterval);
   timerMs = 0; flipped = []; matched = new Set(); isLocked = false; gameStarted = false;
   document.getElementById('timer').textContent = '00:00';
   document.getElementById('pairs-found').textContent = '0';
 
-  // Shuffle: duplicate + shuffle
-  const doubled = [...CARD_DATA, ...CARD_DATA].map((c,i) => ({ ...c, uid: i }));
-  cardDefs = doubled.sort(() => Math.random() - .5);
+  // สุ่ม 6 ไอเทมจาก CARD_DATA
+  const shuffledPool = [...CARD_DATA].sort(() => Math.random() - .5);
+  const picked = shuffledPool.slice(0, PAIRS);
+
+  // ทำเป็นคู่แล้ว shuffle
+  cardDefs = [...picked, ...picked]
+    .map((c, i) => ({ ...c, uid: i }))
+    .sort(() => Math.random() - .5);
 
   buildBoard();
   showScreen('game');
-
-  // Start timer on first card tap
-  gameStarted = false;
 }
+
+
 
 function buildBoard() {
   const board = document.getElementById('board');
@@ -390,7 +430,7 @@ function checkMatch() {
       const found = matched.size / 2;
       document.getElementById('pairs-found').textContent = found;
       flipped = []; isLocked = false;
-      if (found === 8) onWin();
+      if (found === PAIRS) onWin();
     }, 300);
   } else {
     // No match
