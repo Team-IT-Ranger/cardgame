@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="30"> <!-- auto-refresh ทุก 30 วินาที -->
+<title>Leaderboard — Memory Card</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700;800;900&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#0033CC;--gold:#FFD700;--gold-dark:#E6B800;
+  --bg:#000D33;--bg2:#060E2E;--bg3:#0A1540;
+  --text:#fff;--muted:rgba(255,255,255,.55);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* Animated bg */
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,51,204,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,51,204,.06) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
+
+.container{max-width:700px;margin:0 auto;padding:32px 20px}
+
+/* Header */
+.header{text-align:center;margin-bottom:40px}
+.header-icon{font-size:4rem;display:block;margin-bottom:8px}
+.header-title{font-size:2.8rem;font-weight:900;color:var(--gold);text-shadow:0 0 30px rgba(255,215,0,.3);letter-spacing:1px}
+.header-sub{font-size:1rem;color:var(--muted);margin-top:4px;font-family:'Sarabun',sans-serif}
+
+/* Top 3 podium */
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:12px;margin-bottom:36px}
+.podium-item{display:flex;flex-direction:column;align-items:center;gap:8px}
+.podium-avatar{border-radius:50%;object-fit:cover;border:3px solid;box-shadow:0 0 20px currentColor}
+.podium-avatar-fb{border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:800;color:white;border:3px solid}
+.podium-name{font-size:.85rem;font-weight:700;text-align:center;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.podium-time{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.podium-stand{border-radius:8px 8px 0 0;width:90px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:900}
+.p1 .podium-avatar,.p1 .podium-avatar-fb{width:72px;height:72px;border-color:var(--gold);font-size:1.5rem}
+.p1 .podium-stand{height:90px;background:linear-gradient(180deg,#FFD700,#E6B800)}
+.p2 .podium-avatar,.p2 .podium-avatar-fb{width:60px;height:60px;border-color:#C0C0C0;font-size:1.2rem}
+.p2 .podium-stand{height:70px;background:linear-gradient(180deg,#C0C0C0,#A0A0A0)}
+.p3 .podium-avatar,.p3 .podium-avatar-fb{width:52px;height:52px;border-color:#CD7F32;font-size:1rem}
+.p3 .podium-stand{height:55px;background:linear-gradient(180deg,#CD7F32,#A05A20)}
+
+/* Rest of leaderboard */
+.lb-list{display:flex;flex-direction:column;gap:8px;margin-bottom:32px}
+.lb-row{display:flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 16px;transition:background .2s}
+.lb-row.highlight{border-color:rgba(255,215,0,.2);background:rgba(255,215,0,.05)}
+.lb-rank{font-size:1rem;font-weight:800;width:28px;text-align:center;color:var(--muted);flex-shrink:0}
+.lb-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.lb-avatar-fb{width:40px;height:40px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;flex-shrink:0}
+.lb-info{flex:1;min-width:0}
+.lb-name{font-size:1rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-plays{font-size:.72rem;color:var(--muted);font-family:'Sarabun',sans-serif}
+.lb-time{font-size:1.1rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;flex-shrink:0}
+
+/* Footer */
+.footer{text-align:center}
+.footer-qr-label{font-size:.85rem;color:var(--muted);margin-bottom:8px;font-family:'Sarabun',sans-serif}
+.footer-url{font-size:1rem;font-weight:700;color:var(--gold)}
+.refresh-note{font-size:.72rem;color:var(--muted);margin-top:12px;font-family:'Sarabun',sans-serif}
+
+/* Loading/Error */
+.center-msg{text-align:center;padding:60px 20px;color:var(--muted);font-family:'Sarabun',sans-serif;font-size:1.1rem}
+
+/* Marquee strip */
+.strip{background:var(--gold);color:var(--brand);font-weight:800;font-size:.85rem;padding:8px 0;overflow:hidden;white-space:nowrap;position:fixed;bottom:0;left:0;right:0;z-index:10}
+.strip-inner{display:inline-block;animation:marquee 20s linear infinite}
+@keyframes marquee{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <span class="header-icon">🃏</span>
+    <div class="header-title">Memory Card</div>
+    <div class="header-sub">Affiliate Challenge — สถิติดีที่สุด</div>
+  </div>
+
+  <div id="podium-wrap" class="podium" style="display:none"></div>
+  <div id="lb-wrap" class="lb-list"></div>
+
+  <div class="footer">
+    <div class="footer-qr-label">สแกนเพื่อเล่น</div>
+    <div class="footer-url" id="game-url">https://liff.line.me/YOUR_LIFF_ID</div>
+    <div class="refresh-note">หน้านี้จะอัปเดตอัตโนมัติทุก 30 วินาที</div>
+  </div>
+</div>
+
+<div class="strip">
+  <div class="strip-inner" id="strip-text">🏆 Memory Card Challenge — แข่งกันเลย! จับคู่สินค้าให้ครบ 8 คู่ให้เร็วที่สุด 🎮 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+</div>
+
+<script>
+const API_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL';
+
+function formatTime(ms) {
+  const s  = Math.floor(ms/1000);
+  const m  = Math.floor(s/60);
+  const sc = s%60;
+  const ms2 = Math.floor((ms%1000)/10);
+  if(m>0) return `${m}:${String(sc).padStart(2,'0')}.${String(ms2).padStart(2,'0')}`;
+  return `${String(sc).padStart(2,'0')}.${String(ms2).padStart(2,'0')}`;
+}
+
+function avatarHtml(entry, size, borderColor='transparent') {
+  if(entry.pictureUrl) {
+    return `<img class="lb-avatar" src="${entry.pictureUrl}" width="${size}" height="${size}" style="width:${size}px;height:${size}px;border:3px solid ${borderColor}" onerror="this.outerHTML=fallback('${entry.displayName}',${size},'${borderColor}')">`;
+  }
+  return `<div class="lb-avatar-fb" style="width:${size}px;height:${size}px;border:3px solid ${borderColor}">${(entry.displayName||'?').slice(0,2).toUpperCase()}</div>`;
+}
+
+async function load() {
+  try {
+    const r = await fetch(`${API_URL}?action=getLeaderboard`);
+    const d = await r.json();
+    if(!d.success || !d.entries.length) {
+      document.getElementById('lb-wrap').innerHTML = '<div class="center-msg">ยังไม่มีคะแนน — มาเล่นกันเลย! 🎮</div>';
+      return;
+    }
+
+    const entries = d.entries;
+    const top3    = entries.slice(0,3);
+    const rest    = entries.slice(3);
+
+    // Podium top 3
+    const podiumWrap = document.getElementById('podium-wrap');
+    if(top3.length >= 2) {
+      podiumWrap.style.display = 'flex';
+      const order  = top3.length >= 3 ? [top3[1],top3[0],top3[2]] : [top3[0],top3[1]];
+      const classes = top3.length >= 3 ? ['p2','p1','p3'] : ['p2','p1'];
+      const medals  = ['🥈','🥇','🥉'];
+      const heights = [70,90,55];
+      const bcols   = ['#C0C0C0','#FFD700','#CD7F32'];
+
+      podiumWrap.innerHTML = order.map((e,i) => {
+        const cls  = classes[i];
+        const sz   = cls==='p1'?72:cls==='p2'?60:52;
+        const bCol = cls==='p1'?'#FFD700':cls==='p2'?'#C0C0C0':'#CD7F32';
+        const h    = cls==='p1'?90:cls==='p2'?70:55;
+        const med  = cls==='p1'?'🥇':cls==='p2'?'🥈':'🥉';
+        return `<div class="podium-item ${cls}">
+          ${avatarHtml(e,sz,bCol)}
+          <div class="podium-name">${e.displayName}</div>
+          <div class="podium-time">${formatTime(e.bestTime)}</div>
+          <div class="podium-stand" style="height:${h}px">${med}</div>
+        </div>`;
+      }).join('');
+    }
+
+    // Rest
+    const lbWrap = document.getElementById('lb-wrap');
+    lbWrap.innerHTML = rest.map((e,i) => {
+      const rank = i+4;
+      return `<div class="lb-row">
+        <div class="lb-rank">${rank}</div>
+        ${avatarHtml(e,40)}
+        <div class="lb-info">
+          <div class="lb-name">${e.displayName}</div>
+          <div class="lb-plays">เล่นแล้ว ${e.playCount} ครั้ง</div>
+        </div>
+        <div class="lb-time">${formatTime(e.bestTime)}</div>
+      </div>`;
+    }).join('');
+
+    // Marquee
+    if(entries[0]) {
+      document.getElementById('strip-text').textContent =
+        `🏆 อันดับ 1: ${entries[0].displayName} — ${formatTime(entries[0].bestTime)} วินาที    🎮 Memory Card Challenge — แข่งกันเลย!     `;
+    }
+
+  } catch(e) {
+    document.getElementById('lb-wrap').innerHTML = `<div class="center-msg">ไม่สามารถโหลดได้<br>${e.message}</div>`;
+  }
+}
+
+load();
+</script>
+</body>
+</html>
