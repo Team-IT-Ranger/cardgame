@@ -7,560 +7,647 @@
 <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700;800;900&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --brand:#0033CC; --brand-dark:#001F80; --brand-light:#1A4FE8;
-  --gold:#FFD700; --gold-dark:#E6B800;
-  --bg:#000D33; --bg2:#060E2E; --bg3:#0A1540;
-  --text:#FFFFFF; --text-muted:rgba(255,255,255,0.55);
-  --success:#00CC66; --danger:#FF4444;
-  --card-back:#0A2080; --card-front:#FFFFFF;
-  --radius:14px;
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;overscroll-behavior:none}
-body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+  :root {
+    --brand:#0033CC; --brand-dark:#001F80; --brand-light:#1A4FE8;
+    --gold:#FFD700; --gold-dark:#E6B800;
+    --bg:#000D33; --bg2:#060E2E; --bg3:#0A1540;
+    --text:#FFFFFF; --text-muted:rgba(255,255,255,0.55);
+    --success:#00CC66; --danger:#FF4444;
+    --card-back:#0A2080; --card-front:#FFFFFF;
+    --radius:14px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+  body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
 
-/* ── BG particles ── */
-.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(0,51,204,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,51,204,0.07) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+  /* ── BG particles ── */
+  .bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(0,51,204,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,51,204,0.07) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
 
-/* ── SCREENS ── */
-.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;padding:20px;gap:16px;transition:opacity .35s ease,transform .35s ease}
-.screen.hidden{opacity:0;pointer-events:none;transform:scale(.97)}
+  /* ── SCREENS ── */
+  .screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;padding:20px;gap:16px;transition:opacity .35s ease,transform .35s ease}
+  .screen.hidden{opacity:0;pointer-events:none;transform:scale(.97)}
 
-/* ── LOADING ── */
-#s-loading{background:var(--bg)}
-.ld-icon{font-size:3.5rem;animation:bounce .8s ease-in-out infinite alternate}
-@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-12px)}}
-.ld-title{font-size:1.8rem;font-weight:900;color:var(--gold);letter-spacing:1px}
-.ld-bar{width:180px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin-top:8px}
-.ld-fill{height:100%;background:linear-gradient(90deg,var(--brand),var(--gold));border-radius:2px;animation:ldfill 2s ease forwards}
-@keyframes ldfill{from{width:0}to{width:100%}}
+  /* ── LOADING ── */
+  #s-loading{background:var(--bg)}
+  .ld-icon{font-size:3.5rem;animation:bounce .8s ease-in-out infinite alternate}
+  @keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+  .ld-title{font-size:1.8rem;font-weight:900;color:var(--gold);letter-spacing:1px}
+  .ld-bar{width:180px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin-top:8px}
+  .ld-fill{height:100%;background:linear-gradient(90deg,var(--brand),var(--gold));border-radius:2px;animation:ldfill 2s ease forwards}
+  @keyframes ldfill{from{width:0}to{width:100%}}
 
-/* ── INTRO ── */
-#s-intro{background:var(--bg);text-align:center}
-.player-avatar{width:72px;height:72px;border-radius:50%;border:3px solid var(--gold);object-fit:cover;box-shadow:0 0 20px rgba(255,215,0,.3)}
-.player-avatar-fallback{width:72px;height:72px;border-radius:50%;border:3px solid var(--gold);background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:800;color:white}
-.player-name{font-size:1.3rem;font-weight:700;margin-top:8px}
-.player-sub{font-size:.85rem;color:var(--text-muted);font-family:'Sarabun',sans-serif}
-.intro-title{font-size:2rem;font-weight:900;color:var(--gold);line-height:1.1}
-.intro-rules{background:var(--bg3);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:16px 20px;width:100%;max-width:320px;text-align:left}
-.rule-row{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:.88rem;color:rgba(255,255,255,.8);font-family:'Sarabun',sans-serif}
-.rule-icon{font-size:1.1rem;flex-shrink:0}
-.best-time-badge{background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.3);border-radius:8px;padding:8px 16px;font-size:.85rem;color:var(--gold)}
-.start-btn{width:100%;max-width:280px;height:56px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;border-radius:28px;font-family:'Kanit',sans-serif;font-size:1.2rem;font-weight:800;color:var(--brand-dark);cursor:pointer;box-shadow:0 6px 24px rgba(255,215,0,.35);transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden}
-.start-btn::before{content:'';position:absolute;top:-50%;left:-100%;width:60%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:shimmer 2.5s ease-in-out infinite}
-@keyframes shimmer{0%{left:-100%}60%,100%{left:160%}}
-.start-btn:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,215,0,.5)}
-.start-btn:active{transform:scale(.98)}
+  /* ── INTRO ── */
+  #s-intro{background:var(--bg);text-align:center}
+  .player-avatar{width:72px;height:72px;border-radius:50%;border:3px solid var(--gold);object-fit:cover;box-shadow:0 0 20px rgba(255,215,0,.3)}
+  .player-avatar-fallback{width:72px;height:72px;border-radius:50%;border:3px solid var(--gold);background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:800;color:white}
+  .player-name{font-size:1.3rem;font-weight:700;margin-top:8px}
+  .player-sub{font-size:.85rem;color:var(--text-muted);font-family:'Sarabun',sans-serif}
+  .intro-title{font-size:2rem;font-weight:900;color:var(--gold);line-height:1.1}
+  .intro-rules{background:var(--bg3);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:16px 20px;width:100%;max-width:320px;text-align:left}
+  .rule-row{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:.88rem;color:rgba(255,255,255,.8);font-family:'Sarabun',sans-serif}
+  .rule-icon{font-size:1.1rem;flex-shrink:0}
+  .best-time-badge{background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.3);border-radius:8px;padding:8px 16px;font-size:.85rem;color:var(--gold)}
+  .start-btn{width:100%;max-width:280px;height:56px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;border-radius:28px;font-family:'Kanit',sans-serif;font-size:1.2rem;font-weight:800;color:var(--brand-dark);cursor:pointer;box-shadow:0 6px 24px rgba(255,215,0,.35);transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden}
+  .start-btn::before{content:'';position:absolute;top:-50%;left:-100%;width:60%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:shimmer 2.5s ease-in-out infinite}
+  @keyframes shimmer{0%{left:-100%}60%,100%{left:160%}}
+  .start-btn:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,215,0,.5)}
+  .start-btn:active{transform:scale(.98)}
 
-/* ── GAME ── */
-#s-game{
-  background:var(--bg);
-  justify-content:flex-start;
-  padding:8px 8px 8px;
-  height:100vh;
-  height:100dvh;
-  overflow:hidden;
-}
-.game-header{
-  width:100%;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 4px 6px;
-  flex-shrink:0;
-  height:48px;
-}
-.gh-player{display:flex;align-items:center;gap:8px}
-.gh-avatar{width:32px;height:32px;border-radius:50%;border:2px solid var(--gold);object-fit:cover}
-.gh-avatar-fb{width:32px;height:32px;border-radius:50%;border:2px solid var(--gold);background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:white}
-.gh-name{font-size:.85rem;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.timer-display{display:flex;flex-direction:column;align-items:center}
-.timer-label{font-size:.6rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase}
-.timer-val{font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums;color:var(--gold);line-height:1}
-.pairs-info{text-align:right}
-.pairs-val{font-size:1.3rem;font-weight:800;color:var(--success)}
-.pairs-label{font-size:.6rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase}
+  /* ── GAME ── */
+  #s-game{
+    background:var(--bg);
+    justify-content:flex-start;
+    padding:8px 8px 8px;
+    height:100vh;
+    height:100dvh;
+    overflow:hidden;
+  }
+  .game-header{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 4px 6px;
+    flex-shrink:0;
+    height:48px;
+  }
+  .gh-player{display:flex;align-items:center;gap:8px}
+  .gh-avatar{width:32px;height:32px;border-radius:50%;border:2px solid var(--gold);object-fit:cover}
+  .gh-avatar-fb{width:32px;height:32px;border-radius:50%;border:2px solid var(--gold);background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:white}
+  .gh-name{font-size:.85rem;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .timer-display{display:flex;flex-direction:column;align-items:center}
+  .timer-label{font-size:.6rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase}
+  .timer-val{font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums;color:var(--gold);line-height:1}
+  .pairs-info{text-align:right}
+  .pairs-val{font-size:1.3rem;font-weight:800;color:var(--success)}
+  .pairs-label{font-size:.6rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase}
 
-/* ── BOARD ── */
-.board{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  grid-template-rows:repeat(4,1fr);
-  gap:8px;
-  width:100%;
-  flex:1;
-  min-height:0;
-  overflow:hidden;
-}
-.card{
-  position:relative;
-  cursor:pointer;
-  min-height:0;
-  min-width:0;
-  overflow:hidden;
-}
-.card-inner{
-  position:absolute;
-  inset:0;
-  transform-style:preserve-3d;
-  transition:transform .45s cubic-bezier(.4,0,.2,1);
-}
-.card.flipped .card-inner{transform:rotateY(180deg)}
-.card.matched .card-inner{transform:rotateY(180deg)}
-.card-face{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.card-back{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-dark) 100%);border:1.5px solid rgba(255,255,255,.15)}
-.card-back-pattern{font-size:1.4rem;opacity:.5;user-select:none}
-.card-front{background:var(--card-front);transform:rotateY(180deg);border:1.5px solid rgba(0,0,0,.08)}
-.card-front img{width:100%;height:100%;object-fit:cover;border-radius:9px}
-.card-front .card-emoji{font-size:2rem}
-.card.matched .card-face.card-front{background:#e8fff4;border-color:var(--success)}
-.card.matched .card-face.card-front::after{content:'✓';position:absolute;top:4px;right:6px;font-size:.75rem;color:var(--success);font-weight:800}
-.card:not(.flipped):not(.matched):hover .card-back{border-color:rgba(255,215,0,.4)}
-.card.wrong .card-inner{animation:wrong-shake .4s ease}
-@keyframes wrong-shake{0%,100%{transform:rotateY(180deg)}20%{transform:rotateY(180deg) translateX(-4px)}60%{transform:rotateY(180deg) translateX(4px)}}
+  /* ── BOARD ── */
+  .board{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(4,1fr);
+    gap:8px;
+    width:100%;
+    flex:1;
+    min-height:0;
+    overflow:hidden;
+  }
+  .card{
+    position:relative;
+    cursor:pointer;
+    min-height:0;
+    min-width:0;
+    overflow:hidden;
+  }
+  .card-inner{
+    position:absolute;
+    inset:0;
+    transform-style:preserve-3d;
+    transition:transform .45s cubic-bezier(.4,0,.2,1);
+  }
+  .card.flipped .card-inner{transform:rotateY(180deg)}
+  .card.matched .card-inner{transform:rotateY(180deg)}
+  .card-face{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .card-back{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-dark) 100%);border:1.5px solid rgba(255,255,255,.15)}
+  .card-back-pattern{font-size:1.4rem;opacity:.5;user-select:none}
+  .card-front{background:var(--card-front);transform:rotateY(180deg);border:1.5px solid rgba(0,0,0,.08)}
+  .card-front img{width:100%;height:100%;object-fit:cover;border-radius:9px}
+  .card-front .card-emoji{font-size:2rem}
+  .card.matched .card-face.card-front{background:#e8fff4;border-color:var(--success)}
+  .card.matched .card-face.card-front::after{content:'✓';position:absolute;top:4px;right:6px;font-size:.75rem;color:var(--success);font-weight:800}
+  .card:not(.flipped):not(.matched):hover .card-back{border-color:rgba(255,215,0,.4)}
+  .card.wrong .card-inner{animation:wrong-shake .4s ease}
+  @keyframes wrong-shake{0%,100%{transform:rotateY(180deg)}20%{transform:rotateY(180deg) translateX(-4px)}60%{transform:rotateY(180deg) translateX(4px)}}
 
-/* ── WIN SCREEN ── */
-#s-win{background:var(--bg);text-align:center;overflow-y:auto;justify-content:flex-start;padding-top:32px}
-.win-inner{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:340px;padding-bottom:32px}
-.win-trophy{font-size:4rem;animation:pop .5s cubic-bezier(.34,1.56,.64,1) both}
-@keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
-.win-title{font-size:2rem;font-weight:900;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fadein .5s ease .2s both}
-@keyframes fadein{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.win-time-card{background:var(--bg3);border:1px solid rgba(255,215,0,.3);border-radius:var(--radius);padding:16px 28px;animation:fadein .5s ease .3s both;width:100%}
-.wt-label{font-size:.75rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase}
-.wt-time{font-size:2.8rem;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1.1}
-.wt-best{font-size:.8rem;color:var(--success);margin-top:4px;font-family:'Sarabun',sans-serif}
-.wt-prev{font-size:.8rem;color:var(--text-muted);margin-top:2px;font-family:'Sarabun',sans-serif}
+  /* ── WIN SCREEN ── */
+  #s-win{background:var(--bg);text-align:center;overflow-y:auto;justify-content:flex-start;padding-top:32px}
+  .win-inner{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:340px;padding-bottom:32px}
+  .win-trophy{font-size:4rem;animation:pop .5s cubic-bezier(.34,1.56,.64,1) both}
+  @keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+  .win-title{font-size:2rem;font-weight:900;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fadein .5s ease .2s both}
+  @keyframes fadein{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .win-time-card{background:var(--bg3);border:1px solid rgba(255,215,0,.3);border-radius:var(--radius);padding:16px 28px;animation:fadein .5s ease .3s both;width:100%}
+  .wt-label{font-size:.75rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase}
+  .wt-time{font-size:2.8rem;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1.1}
+  .wt-best{font-size:.8rem;color:var(--success);margin-top:4px;font-family:'Sarabun',sans-serif}
+  .wt-prev{font-size:.8rem;color:var(--text-muted);margin-top:2px;font-family:'Sarabun',sans-serif}
 
-/* Leaderboard */
-.lb-title{font-size:.8rem;font-weight:700;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;align-self:flex-start;animation:fadein .5s ease .4s both}
-.lb-list{width:100%;display:flex;flex-direction:column;gap:8px;animation:fadein .5s ease .45s both}
-.lb-row{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 14px}
-.lb-row.me{border-color:rgba(255,215,0,.35);background:rgba(255,215,0,.06)}
-.lb-rank{font-size:1rem;font-weight:800;width:24px;text-align:center;flex-shrink:0}
-.lb-rank.r1{color:var(--gold)}
-.lb-rank.r2{color:#C0C0C0}
-.lb-rank.r3{color:#CD7F32}
-.lb-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0}
-.lb-avatar-fb{width:30px;height:30px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;flex-shrink:0}
-.lb-name{font-size:.88rem;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lb-time{font-size:.9rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;flex-shrink:0}
-.lb-empty{text-align:center;padding:20px;color:var(--text-muted);font-family:'Sarabun',sans-serif;font-size:.9rem}
+  /* Leaderboard */
+  .lb-title{font-size:.8rem;font-weight:700;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;align-self:flex-start;animation:fadein .5s ease .4s both}
+  .lb-list{width:100%;display:flex;flex-direction:column;gap:8px;animation:fadein .5s ease .45s both}
+  .lb-row{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 14px}
+  .lb-row.me{border-color:rgba(255,215,0,.35);background:rgba(255,215,0,.06)}
+  .lb-rank{font-size:1rem;font-weight:800;width:24px;text-align:center;flex-shrink:0}
+  .lb-rank.r1{color:var(--gold)}
+  .lb-rank.r2{color:#C0C0C0}
+  .lb-rank.r3{color:#CD7F32}
+  .lb-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0}
+  .lb-avatar-fb{width:30px;height:30px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;flex-shrink:0}
+  .lb-name{font-size:.88rem;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lb-time{font-size:.9rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;flex-shrink:0}
+  .lb-empty{text-align:center;padding:20px;color:var(--text-muted);font-family:'Sarabun',sans-serif;font-size:.9rem}
 
-.play-again-btn{width:100%;height:52px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;border-radius:26px;font-family:'Kanit',sans-serif;font-size:1.1rem;font-weight:800;color:var(--brand-dark);cursor:pointer;box-shadow:0 6px 20px rgba(255,215,0,.3);transition:transform .15s;animation:fadein .5s ease .6s both}
-.play-again-btn:hover{transform:translateY(-2px)}
-.play-again-btn:active{transform:scale(.98)}
+  .play-again-btn{width:100%;height:52px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;border-radius:26px;font-family:'Kanit',sans-serif;font-size:1.1rem;font-weight:800;color:var(--brand-dark);cursor:pointer;box-shadow:0 6px 20px rgba(255,215,0,.3);transition:transform .15s;animation:fadein .5s ease .6s both}
+  .play-again-btn:hover{transform:translateY(-2px)}
+  .play-again-btn:active{transform:scale(.98)}
 
-/* ERROR */
-#s-error{text-align:center}
-.err-icon{font-size:3.5rem}
-.err-title{font-size:1.5rem;font-weight:800;color:var(--danger)}
-.err-desc{font-size:.9rem;color:var(--text-muted);font-family:'Sarabun',sans-serif;line-height:1.6}
-.retry-btn{padding:12px 32px;background:var(--brand);border:none;border-radius:24px;color:white;font-family:'Kanit',sans-serif;font-size:1rem;font-weight:700;cursor:pointer}
+  /* ERROR */
+  #s-error{text-align:center}
+  .err-icon{font-size:3.5rem}
+  .err-title{font-size:1.5rem;font-weight:800;color:var(--danger)}
+  .err-desc{font-size:.9rem;color:var(--text-muted);font-family:'Sarabun',sans-serif;line-height:1.6}
+  .retry-btn{padding:12px 32px;background:var(--brand);border:none;border-radius:24px;color:white;font-family:'Kanit',sans-serif;font-size:1rem;font-weight:700;cursor:pointer}
 
-/* Confetti */
-.conf{position:fixed;top:-20px;pointer-events:none;z-index:200;animation:conf-fall var(--d) linear var(--dl) forwards}
-@keyframes conf-fall{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--tx),110vh) rotate(var(--r));opacity:0}}
+  /* Confetti */
+  .conf{position:fixed;top:-20px;pointer-events:none;z-index:200;animation:conf-fall var(--d) linear var(--dl) forwards}
+  @keyframes conf-fall{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--tx),110vh) rotate(var(--r));opacity:0}}
+
+  /* Countdown overlay */
+  .countdown-overlay{
+    position:fixed;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(0,13,51,0.75);
+    backdrop-filter:blur(3px);
+    z-index:100;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .3s;
+  }
+  .countdown-overlay.show{opacity:1}
+  .countdown-number{
+    font-size:30vw;
+    font-weight:900;
+    color:var(--gold);
+    text-shadow:0 0 60px rgba(255,215,0,.6);
+    animation:cd-pop .8s cubic-bezier(.34,1.56,.64,1) both;
+    line-height:1;
+  }
+  @keyframes cd-pop{
+    0%{transform:scale(2);opacity:0}
+    100%{transform:scale(1);opacity:1}
+  }
+  .preview-banner{
+    position:fixed;top:70px;left:0;right:0;
+    text-align:center;z-index:101;pointer-events:none;
+  }
+  .preview-banner-text{
+    display:inline-block;
+    background:rgba(0,51,204,.85);
+    border:1px solid var(--gold);
+    border-radius:20px;
+    padding:6px 20px;
+    font-size:.9rem;font-weight:700;
+    color:var(--gold);
+    backdrop-filter:blur(4px);
+  }
+
 </style>
 </head>
 <body>
-<div class="bg-grid"></div>
+  <div class="bg-grid"></div>
 
-<!-- LOADING -->
-<div class="screen" id="s-loading">
-  <div class="ld-icon">🃏</div>
-  <div class="ld-title">Memory Card</div>
-  <div style="font-size:.85rem;color:var(--text-muted);font-family:'Sarabun',sans-serif">Affiliate Challenge 2025</div>
-  <div class="ld-bar"><div class="ld-fill"></div></div>
-</div>
-
-<!-- INTRO -->
-<div class="screen hidden" id="s-intro">
-  <div id="avatar-wrap"></div>
-  <div class="player-name" id="player-name">–</div>
-  <div class="player-sub">พร้อมแล้วหรือยัง?</div>
-
-  <div class="intro-title">🃏 Memory Card<br>Challenge</div>
-
-  <div class="intro-rules">
-    <div class="rule-row"><span class="rule-icon">🔄</span>พลิกการ์ดจับคู่สินค้าให้ครบ 8 คู่</div>
-    <div class="rule-row"><span class="rule-icon">⚡</span>จำตำแหน่งการ์ดให้แม่น ทำเวลาให้เร็ว</div>
-    <div class="rule-row"><span class="rule-icon">🏆</span>เวลาดีที่สุดจะถูกบันทึกใน Leaderboard</div>
-    <div class="rule-row"><span class="rule-icon">🔁</span>เล่นซ้ำได้ไม่จำกัด</div>
+  <!-- LOADING -->
+  <div class="screen" id="s-loading">
+    <div class="ld-icon">🃏</div>
+    <div class="ld-title">Memory Card</div>
+    <div style="font-size:.85rem;color:var(--text-muted);font-family:'Sarabun',sans-serif">Affiliate Challenge 2025</div>
+    <div class="ld-bar"><div class="ld-fill"></div></div>
   </div>
 
-  <div class="best-time-badge" id="best-badge" style="display:none">
-    🥇 เวลาดีที่สุดของคุณ: <strong id="best-time-disp">–</strong>
+  <!-- INTRO -->
+  <div class="screen hidden" id="s-intro">
+    <div id="avatar-wrap"></div>
+    <div class="player-name" id="player-name">–</div>
+    <div class="player-sub">พร้อมแล้วหรือยัง?</div>
+
+    <div class="intro-title">🃏 Memory Card<br>Challenge</div>
+
+    <div class="intro-rules">
+      <div class="rule-row"><span class="rule-icon">🔄</span>พลิกการ์ดจับคู่สินค้าให้ครบ 6 คู่</div>
+      <div class="rule-row"><span class="rule-icon">⚡</span>จำตำแหน่งการ์ดให้แม่น ทำเวลาให้เร็ว</div>
+      <div class="rule-row"><span class="rule-icon">🏆</span>เวลาดีที่สุดจะถูกบันทึกใน Leaderboard</div>
+      <div class="rule-row"><span class="rule-icon">🔁</span>เล่นซ้ำได้ไม่จำกัด</div>
+    </div>
+
+    <div class="best-time-badge" id="best-badge" style="display:none">
+      🥇 เวลาดีที่สุดของคุณ: <strong id="best-time-disp">–</strong>
+    </div>
+
+    <button class="start-btn" onclick="startGame()">เริ่มเล่น! 🚀</button>
   </div>
 
-  <button class="start-btn" onclick="startGame()">เริ่มเล่น! 🚀</button>
-</div>
+  <!-- GAME -->
+  <div class="screen hidden" id="s-game">
+    <div class="game-header">
+      <div class="gh-player">
+        <div id="gh-avatar-wrap"></div>
+        <div class="gh-name" id="gh-name">–</div>
+      </div>
+      <div class="timer-display">
+        <div class="timer-label">เวลา</div>
+        <div class="timer-val" id="timer">00:00</div>
+      </div>
+      <div class="pairs-info">
+        <div class="pairs-val"><span id="pairs-found">0</span>/6</div>
+        <div class="pairs-label">คู่</div>
+      </div>
+    </div>
+    <div class="board" id="board"></div>
+  </div>
 
-<!-- GAME -->
-<div class="screen hidden" id="s-game">
-  <div class="game-header">
-    <div class="gh-player">
-      <div id="gh-avatar-wrap"></div>
-      <div class="gh-name" id="gh-name">–</div>
-    </div>
-    <div class="timer-display">
-      <div class="timer-label">เวลา</div>
-      <div class="timer-val" id="timer">00:00</div>
-    </div>
-    <div class="pairs-info">
-      <div class="pairs-val"><span id="pairs-found">0</span>/6</div>
-      <div class="pairs-label">คู่</div>
+  <!-- WIN -->
+  <div class="screen hidden" id="s-win">
+    <div class="win-inner">
+      <div class="win-trophy" id="win-trophy">🏆</div>
+      <div class="win-title" id="win-title">จับคู่ครบแล้ว!</div>
+
+      <div class="win-time-card">
+        <div class="wt-label">เวลาที่ใช้</div>
+        <div class="wt-time" id="win-time">–</div>
+        <div class="wt-best" id="win-best" style="display:none">🎉 เวลาดีที่สุดใหม่!</div>
+        <div class="wt-prev" id="win-prev" style="display:none"></div>
+      </div>
+
+      <div class="lb-title">🏆 Leaderboard</div>
+      <div class="lb-list" id="lb-list"><div class="lb-empty">กำลังโหลด...</div></div>
+
+      <button class="play-again-btn" onclick="playAgain()">🔄 เล่นอีกครั้ง</button>
     </div>
   </div>
-  <div class="board" id="board"></div>
-</div>
 
-<!-- WIN -->
-<div class="screen hidden" id="s-win">
-  <div class="win-inner">
-    <div class="win-trophy" id="win-trophy">🏆</div>
-    <div class="win-title" id="win-title">จับคู่ครบแล้ว!</div>
-
-    <div class="win-time-card">
-      <div class="wt-label">เวลาที่ใช้</div>
-      <div class="wt-time" id="win-time">–</div>
-      <div class="wt-best" id="win-best" style="display:none">🎉 เวลาดีที่สุดใหม่!</div>
-      <div class="wt-prev" id="win-prev" style="display:none"></div>
-    </div>
-
-    <div class="lb-title">🏆 Leaderboard</div>
-    <div class="lb-list" id="lb-list"><div class="lb-empty">กำลังโหลด...</div></div>
-
-    <button class="play-again-btn" onclick="playAgain()">🔄 เล่นอีกครั้ง</button>
+  <!-- ERROR -->
+  <div class="screen hidden" id="s-error">
+    <div class="err-icon">⚠️</div>
+    <div class="err-title">เกิดข้อผิดพลาด</div>
+    <div class="err-desc" id="err-msg">ไม่สามารถเชื่อมต่อได้</div>
+    <button class="retry-btn" onclick="location.reload()">ลองใหม่</button>
   </div>
-</div>
 
-<!-- ERROR -->
-<div class="screen hidden" id="s-error">
-  <div class="err-icon">⚠️</div>
-  <div class="err-title">เกิดข้อผิดพลาด</div>
-  <div class="err-desc" id="err-msg">ไม่สามารถเชื่อมต่อได้</div>
-  <button class="retry-btn" onclick="location.reload()">ลองใหม่</button>
-</div>
+  <script>
+  // ─────────────────────────────────────────
+  // CONFIG — แก้ตามระบบจริง
+  // ─────────────────────────────────────────
+  const CONFIG = {
+    LIFF_ID: '2010102212-gfhenzK0',
+    API_URL:  'https://script.google.com/macros/s/AKfycbzOzuWgbakgVyPfE0jFm0LCXgrz-aCMwi0ti1YpaoDVXJNX6uUblm0Y4AxML25ghFeI/exec',
+    DEMO_MODE: false
+  };
 
-<script>
-// ─────────────────────────────────────────
-// CONFIG — แก้ตามระบบจริง
-// ─────────────────────────────────────────
-const CONFIG = {
-  LIFF_ID: '2010102212-gfhenzK0',
-  API_URL:  'https://script.google.com/macros/s/AKfycbzOzuWgbakgVyPfE0jFm0LCXgrz-aCMwi0ti1YpaoDVXJNX6uUblm0Y4AxML25ghFeI/exec',
-  DEMO_MODE: false
-};
-
-// ─────────────────────────────────────────
-// CARD DATA — แก้ imageUrl เป็น URL รูปจริง
-// วางรูปบน Google Drive (share as public)
-// หรือ GitHub repo แล้วใช้ raw URL
-// ─────────────────────────────────────────
-const CARD_DATA = [
-  { id:1,  name:'สินค้า 01', emoji:'🛡️', imageUrl:'img/01.png' },
-  { id:2,  name:'สินค้า 02', emoji:'⏰', imageUrl:'img/02.png' },
-  { id:3,  name:'สินค้า 03', emoji:'🌿', imageUrl:'img/03.png' },
-  { id:4,  name:'สินค้า 04', emoji:'⭐', imageUrl:'img/04.png' },
-  { id:5,  name:'สินค้า 05', emoji:'📺', imageUrl:'img/05.png' },
-  { id:6,  name:'สินค้า 06', emoji:'🎫', imageUrl:'img/06.png' },
-  { id:7,  name:'สินค้า 07', emoji:'🆕', imageUrl:'img/07.png' },
-  { id:8,  name:'สินค้า 08', emoji:'💎', imageUrl:'img/08.png' },
-  { id:9,  name:'สินค้า 09', emoji:'🎁', imageUrl:'img/09.png' },
-  { id:10, name:'สินค้า 10', emoji:'🔥', imageUrl:'img/10.png' },
-];
+  // ─────────────────────────────────────────
+  // CARD DATA — แก้ imageUrl เป็น URL รูปจริง
+  // วางรูปบน Google Drive (share as public)
+  // หรือ GitHub repo แล้วใช้ raw URL
+  // ─────────────────────────────────────────
+  const CARD_DATA = [
+    { id:1,  name:'สินค้า 01', emoji:'🛡️', imageUrl:'img/01.png' },
+    { id:2,  name:'สินค้า 02', emoji:'⏰', imageUrl:'img/02.png' },
+    { id:3,  name:'สินค้า 03', emoji:'🌿', imageUrl:'img/03.png' },
+    { id:4,  name:'สินค้า 04', emoji:'⭐', imageUrl:'img/04.png' },
+    { id:5,  name:'สินค้า 05', emoji:'📺', imageUrl:'img/05.png' },
+    { id:6,  name:'สินค้า 06', emoji:'🎫', imageUrl:'img/06.png' },
+    { id:7,  name:'สินค้า 07', emoji:'🆕', imageUrl:'img/07.png' },
+    { id:8,  name:'สินค้า 08', emoji:'💎', imageUrl:'img/08.png' },
+    { id:9,  name:'สินค้า 09', emoji:'🎁', imageUrl:'img/09.png' },
+    { id:10, name:'สินค้า 10', emoji:'🔥', imageUrl:'img/10.png' },
+  ];
 
 
-const PAIRS = 6; // จำนวนคู่ต่อเกม (3x4 = 6 คู่)
-// ─────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────
-let player   = { userId:'', displayName:'', pictureUrl:'' };
-let bestTime = null;        // ms
-let timerMs  = 0;
-let timerInterval = null;
-let flipped  = [];          // [{el, id}]
-let matched  = new Set();
-let isLocked = false;
-let gameStarted = false;
-let cardDefs = [];          // shuffled card definitions
+  const PAIRS = 6; // จำนวนคู่ต่อเกม (3x4 = 6 คู่)
+  // ─────────────────────────────────────────
+  // STATE
+  // ─────────────────────────────────────────
+  let player   = { userId:'', displayName:'', pictureUrl:'' };
+  let bestTime = null;        // ms
+  let timerMs  = 0;
+  let timerInterval = null;
+  let flipped  = [];          // [{el, id}]
+  let matched  = new Set();
+  let isLocked = false;
+  let gameStarted = false;
+  let cardDefs = [];          // shuffled card definitions
 
-// ─────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────
-window.addEventListener('load', async () => {
-  await new Promise(r => setTimeout(r, 1800)); // loading anim
+  // ─────────────────────────────────────────
+  // INIT
+  // ─────────────────────────────────────────
+  window.addEventListener('load', async () => {
+    await new Promise(r => setTimeout(r, 1800)); // loading anim
 
-  if (CONFIG.DEMO_MODE) {
-    player = { userId:'DEMO_001', displayName:'ทดสอบระบบ', pictureUrl:'' };
-    await fetchBestTime();
-    showIntro();
-  } else {
-    try {
-      await liff.init({ liffId: CONFIG.LIFF_ID });
-      if (!liff.isLoggedIn()) { liff.login(); return; }
-      const p = await liff.getProfile();
-      player = { userId: p.userId, displayName: p.displayName, pictureUrl: p.pictureUrl };
+    if (CONFIG.DEMO_MODE) {
+      player = { userId:'DEMO_001', displayName:'ทดสอบระบบ', pictureUrl:'' };
       await fetchBestTime();
       showIntro();
-    } catch(e) { showError('ไม่สามารถเชื่อมต่อ Line ได้<br>' + e.message); }
+    } else {
+      try {
+        await liff.init({ liffId: CONFIG.LIFF_ID });
+        if (!liff.isLoggedIn()) { liff.login(); return; }
+        const p = await liff.getProfile();
+        player = { userId: p.userId, displayName: p.displayName, pictureUrl: p.pictureUrl };
+        await fetchBestTime();
+        showIntro();
+      } catch(e) { showError('ไม่สามารถเชื่อมต่อ Line ได้<br>' + e.message); }
+    }
+  });
+
+  async function fetchBestTime() {
+    try {
+      const r = await callAPI('getBest', { userId: player.userId });
+      if (r.bestTime) bestTime = r.bestTime;
+    } catch(e) { /* ไม่มี record ยังไม่เคยเล่น */ }
   }
-});
 
-async function fetchBestTime() {
-  try {
-    const r = await callAPI('getBest', { userId: player.userId });
-    if (r.bestTime) bestTime = r.bestTime;
-  } catch(e) { /* ไม่มี record ยังไม่เคยเล่น */ }
-}
+  // ─────────────────────────────────────────
+  // INTRO
+  // ─────────────────────────────────────────
+  function showIntro() {
+    setAvatarEl('avatar-wrap', player.pictureUrl, player.displayName, 72);
+    setAvatarEl('gh-avatar-wrap', player.pictureUrl, player.displayName, 32);
+    document.getElementById('player-name').textContent = player.displayName;
+    document.getElementById('gh-name').textContent = player.displayName;
 
-// ─────────────────────────────────────────
-// INTRO
-// ─────────────────────────────────────────
-function showIntro() {
-  setAvatarEl('avatar-wrap', player.pictureUrl, player.displayName, 72);
-  setAvatarEl('gh-avatar-wrap', player.pictureUrl, player.displayName, 32);
-  document.getElementById('player-name').textContent = player.displayName;
-  document.getElementById('gh-name').textContent = player.displayName;
+    if (bestTime !== null) {
+      document.getElementById('best-badge').style.display = 'block';
+      document.getElementById('best-time-disp').textContent = formatTime(bestTime);
+    }
+    showScreen('intro');
+  }
 
-  if (bestTime !== null) {
+  function setAvatarEl(containerId, pictureUrl, name, size) {
+    const wrap = document.getElementById(containerId);
+    wrap.innerHTML = '';
+    if (pictureUrl) {
+      const img = document.createElement('img');
+      img.src = pictureUrl;
+      img.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;border:${size>40?'3':'2'}px solid var(--gold);object-fit:cover`;
+      img.onerror = () => { wrap.innerHTML = fallbackAvatar(name, size); };
+      wrap.appendChild(img);
+    } else {
+      wrap.innerHTML = fallbackAvatar(name, size);
+    }
+  }
+
+  function fallbackAvatar(name, size) {
+    const initials = name ? name.slice(0,2).toUpperCase() : '??';
+    return `<div style="width:${size}px;height:${size}px;border-radius:50%;border:${size>40?'3':'2'}px solid var(--gold);background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:${size*.35}px;font-weight:800;color:white">${initials}</div>`;
+  }
+
+  // ─────────────────────────────────────────
+  // GAME
+  // ─────────────────────────────────────────
+  function startGame() {
+    clearInterval(timerInterval);
+    timerMs = 0; flipped = []; matched = new Set();
+    isLocked = true; gameStarted = false;
+    document.getElementById('timer').textContent = '00:00';
+    document.getElementById('pairs-found').textContent = '0';
+
+    // สุ่ม 6 ไอเทมจาก CARD_DATA
+    const picked = [...CARD_DATA]
+      .sort(() => Math.random() - .5)
+      .slice(0, PAIRS);
+    cardDefs = [...picked, ...picked]
+      .map((c, i) => ({ ...c, uid: i }))
+      .sort(() => Math.random() - .5);
+
+    buildBoard();
+    showScreen('game');
+
+    // เปิดไพ่ทั้งหมดให้ดูก่อน
+    setTimeout(() => previewCards(), 100);
+  }
+
+  function previewCards() {
+    // เปิดการ์ดทั้งหมด
+    document.querySelectorAll('.card').forEach(c => c.classList.add('flipped'));
+    document.getElementById('preview-banner').style.display = 'block';
+
+    const overlay = document.getElementById('cd-overlay');
+    const numEl   = document.getElementById('cd-number');
+    let count = 3;
+
+    // แสดงตัวเลข 3 2 1
+    function showCount() {
+      numEl.textContent = count;
+      // reset animation
+      numEl.style.animation = 'none';
+      numEl.offsetHeight; // reflow
+      numEl.style.animation = '';
+      overlay.classList.add('show');
+
+      count--;
+      if (count >= 0) {
+        setTimeout(showCount, 1000);
+      } else {
+        // ซ่อนทุกอย่างแล้วเริ่มเกม
+        overlay.classList.remove('show');
+        document.getElementById('preview-banner').style.display = 'none';
+        setTimeout(() => {
+          document.querySelectorAll('.card').forEach(c => c.classList.remove('flipped'));
+          isLocked = false;
+        }, 300);
+      }
+    }
+
+    showCount();
+  }
+
+
+  function buildBoard() {
+    const board = document.getElementById('board');
+    board.innerHTML = '';
+    cardDefs.forEach(card => {
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.dataset.id  = card.id;
+      el.dataset.uid = card.uid;
+      el.innerHTML = `
+        <div class="card-inner">
+          <div class="card-face card-back">
+            <div class="card-back-pattern">🃏</div>
+          </div>
+          <div class="card-face card-front">
+            ${card.imageUrl
+              ? `<img src="${card.imageUrl}" alt="${card.name}" loading="lazy">`
+              : `<div class="card-emoji">${card.emoji}</div>`}
+          </div>
+        </div>`;
+      el.addEventListener('click', () => onCardClick(el, card));
+      board.appendChild(el);
+    });
+  }
+
+  function onCardClick(el, card) {
+    if (isLocked) return;
+    if (el.classList.contains('flipped') || el.classList.contains('matched')) return;
+
+    // Start timer on first tap
+    if (!gameStarted) {
+      gameStarted = true;
+      timerInterval = setInterval(() => {
+        timerMs += 100;
+        document.getElementById('timer').textContent = formatTime(timerMs);
+      }, 100);
+    }
+
+    el.classList.add('flipped');
+    flipped.push({ el, card });
+
+    if (flipped.length === 2) {
+      isLocked = true;
+      checkMatch();
+    }
+  }
+
+  function checkMatch() {
+    const [a, b] = flipped;
+    if (a.card.id === b.card.id) {
+      // Match!
+      setTimeout(() => {
+        a.el.classList.remove('flipped'); a.el.classList.add('matched');
+        b.el.classList.remove('flipped'); b.el.classList.add('matched');
+        matched.add(a.card.uid); matched.add(b.card.uid);
+        const found = matched.size / 2;
+        document.getElementById('pairs-found').textContent = found;
+        flipped = []; isLocked = false;
+        if (found === PAIRS) onWin();
+      }, 300);
+    } else {
+      // No match
+      setTimeout(() => {
+        a.el.classList.add('wrong'); b.el.classList.add('wrong');
+        setTimeout(() => {
+          a.el.classList.remove('flipped','wrong');
+          b.el.classList.remove('flipped','wrong');
+          flipped = []; isLocked = false;
+        }, 500);
+      }, 600);
+    }
+  }
+
+  // ─────────────────────────────────────────
+  // WIN
+  // ─────────────────────────────────────────
+  async function onWin() {
+    clearInterval(timerInterval);
+    const elapsed = timerMs;
+    const isNewBest = bestTime === null || elapsed < bestTime;
+
+    document.getElementById('win-time').textContent = formatTime(elapsed);
+    document.getElementById('win-trophy').textContent = isNewBest ? '🏆' : '🎉';
+    document.getElementById('win-title').textContent  = isNewBest ? 'สถิติใหม่!' : 'จับคู่ครบแล้ว!';
+
+    if (isNewBest) {
+      document.getElementById('win-best').style.display = 'block';
+      if (bestTime !== null) {
+        document.getElementById('win-prev').style.display = 'block';
+        document.getElementById('win-prev').textContent = `เดิม: ${formatTime(bestTime)}`;
+      }
+      bestTime = elapsed;
+      launchConfetti();
+    } else {
+      document.getElementById('win-prev').style.display = 'block';
+      document.getElementById('win-prev').textContent = `สถิติดีที่สุด: ${formatTime(bestTime)}`;
+    }
+
+    showScreen('win');
+
+    // Update best time in badge
     document.getElementById('best-badge').style.display = 'block';
     document.getElementById('best-time-disp').textContent = formatTime(bestTime);
-  }
-  showScreen('intro');
-}
 
-function setAvatarEl(containerId, pictureUrl, name, size) {
-  const wrap = document.getElementById(containerId);
-  wrap.innerHTML = '';
-  if (pictureUrl) {
-    const img = document.createElement('img');
-    img.src = pictureUrl;
-    img.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;border:${size>40?'3':'2'}px solid var(--gold);object-fit:cover`;
-    img.onerror = () => { wrap.innerHTML = fallbackAvatar(name, size); };
-    wrap.appendChild(img);
-  } else {
-    wrap.innerHTML = fallbackAvatar(name, size);
-  }
-}
+    // Save + fetch leaderboard
+    try {
+      await callAPI('saveScore', {
+        userId:      player.userId,
+        displayName: player.displayName,
+        pictureUrl:  player.pictureUrl || '',
+        timeMs:      elapsed
+      });
+    } catch(e) { console.warn('Save failed:', e); }
 
-function fallbackAvatar(name, size) {
-  const initials = name ? name.slice(0,2).toUpperCase() : '??';
-  return `<div style="width:${size}px;height:${size}px;border-radius:50%;border:${size>40?'3':'2'}px solid var(--gold);background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:${size*.35}px;font-weight:800;color:white">${initials}</div>`;
-}
-
-// ─────────────────────────────────────────
-// GAME
-// ─────────────────────────────────────────
-function startGame() {
-  clearInterval(timerInterval);
-  timerMs = 0; flipped = []; matched = new Set(); isLocked = false; gameStarted = false;
-  document.getElementById('timer').textContent = '00:00';
-  document.getElementById('pairs-found').textContent = '0';
-
-  // สุ่ม 6 ไอเทมจาก CARD_DATA
-  const shuffledPool = [...CARD_DATA].sort(() => Math.random() - .5);
-  const picked = shuffledPool.slice(0, PAIRS);
-
-  // ทำเป็นคู่แล้ว shuffle
-  cardDefs = [...picked, ...picked]
-    .map((c, i) => ({ ...c, uid: i }))
-    .sort(() => Math.random() - .5);
-
-  buildBoard();
-  showScreen('game');
-}
-
-
-
-function buildBoard() {
-  const board = document.getElementById('board');
-  board.innerHTML = '';
-  cardDefs.forEach(card => {
-    const el = document.createElement('div');
-    el.className = 'card';
-    el.dataset.id  = card.id;
-    el.dataset.uid = card.uid;
-    el.innerHTML = `
-      <div class="card-inner">
-        <div class="card-face card-back">
-          <div class="card-back-pattern">🃏</div>
-        </div>
-        <div class="card-face card-front">
-          ${card.imageUrl
-            ? `<img src="${card.imageUrl}" alt="${card.name}" loading="lazy">`
-            : `<div class="card-emoji">${card.emoji}</div>`}
-        </div>
-      </div>`;
-    el.addEventListener('click', () => onCardClick(el, card));
-    board.appendChild(el);
-  });
-}
-
-function onCardClick(el, card) {
-  if (isLocked) return;
-  if (el.classList.contains('flipped') || el.classList.contains('matched')) return;
-
-  // Start timer on first tap
-  if (!gameStarted) {
-    gameStarted = true;
-    timerInterval = setInterval(() => {
-      timerMs += 100;
-      document.getElementById('timer').textContent = formatTime(timerMs);
-    }, 100);
-  }
-
-  el.classList.add('flipped');
-  flipped.push({ el, card });
-
-  if (flipped.length === 2) {
-    isLocked = true;
-    checkMatch();
-  }
-}
-
-function checkMatch() {
-  const [a, b] = flipped;
-  if (a.card.id === b.card.id) {
-    // Match!
-    setTimeout(() => {
-      a.el.classList.remove('flipped'); a.el.classList.add('matched');
-      b.el.classList.remove('flipped'); b.el.classList.add('matched');
-      matched.add(a.card.uid); matched.add(b.card.uid);
-      const found = matched.size / 2;
-      document.getElementById('pairs-found').textContent = found;
-      flipped = []; isLocked = false;
-      if (found === PAIRS) onWin();
-    }, 300);
-  } else {
-    // No match
-    setTimeout(() => {
-      a.el.classList.add('wrong'); b.el.classList.add('wrong');
-      setTimeout(() => {
-        a.el.classList.remove('flipped','wrong');
-        b.el.classList.remove('flipped','wrong');
-        flipped = []; isLocked = false;
-      }, 500);
-    }, 600);
-  }
-}
-
-// ─────────────────────────────────────────
-// WIN
-// ─────────────────────────────────────────
-async function onWin() {
-  clearInterval(timerInterval);
-  const elapsed = timerMs;
-  const isNewBest = bestTime === null || elapsed < bestTime;
-
-  document.getElementById('win-time').textContent = formatTime(elapsed);
-  document.getElementById('win-trophy').textContent = isNewBest ? '🏆' : '🎉';
-  document.getElementById('win-title').textContent  = isNewBest ? 'สถิติใหม่!' : 'จับคู่ครบแล้ว!';
-
-  if (isNewBest) {
-    document.getElementById('win-best').style.display = 'block';
-    if (bestTime !== null) {
-      document.getElementById('win-prev').style.display = 'block';
-      document.getElementById('win-prev').textContent = `เดิม: ${formatTime(bestTime)}`;
+    try {
+      const lb = await callAPI('getLeaderboard', {});
+      renderLeaderboard(lb.entries || []);
+    } catch(e) {
+      document.getElementById('lb-list').innerHTML = '<div class="lb-empty">ไม่สามารถโหลด Leaderboard ได้</div>';
     }
-    bestTime = elapsed;
-    launchConfetti();
-  } else {
-    document.getElementById('win-prev').style.display = 'block';
-    document.getElementById('win-prev').textContent = `สถิติดีที่สุด: ${formatTime(bestTime)}`;
   }
 
-  showScreen('win');
-
-  // Update best time in badge
-  document.getElementById('best-badge').style.display = 'block';
-  document.getElementById('best-time-disp').textContent = formatTime(bestTime);
-
-  // Save + fetch leaderboard
-  try {
-    await callAPI('saveScore', {
-      userId:      player.userId,
-      displayName: player.displayName,
-      pictureUrl:  player.pictureUrl || '',
-      timeMs:      elapsed
-    });
-  } catch(e) { console.warn('Save failed:', e); }
-
-  try {
-    const lb = await callAPI('getLeaderboard', {});
-    renderLeaderboard(lb.entries || []);
-  } catch(e) {
-    document.getElementById('lb-list').innerHTML = '<div class="lb-empty">ไม่สามารถโหลด Leaderboard ได้</div>';
+  function renderLeaderboard(entries) {
+    const list = document.getElementById('lb-list');
+    if (!entries.length) {
+      list.innerHTML = '<div class="lb-empty">ยังไม่มีคะแนน</div>';
+      return;
+    }
+    const rankEmoji = ['🥇','🥈','🥉'];
+    list.innerHTML = entries.slice(0,10).map((e, i) => {
+      const isMe = e.userId === player.userId;
+      const rankClass = i < 3 ? `r${i+1}` : '';
+      const avatarHtml = e.pictureUrl
+        ? `<img class="lb-avatar" src="${e.pictureUrl}" onerror="this.outerHTML='<div class=\\'lb-avatar-fb\\'>${e.displayName.slice(0,2).toUpperCase()}</div>'">`
+        : `<div class="lb-avatar-fb">${(e.displayName||'?').slice(0,2).toUpperCase()}</div>`;
+      return `<div class="lb-row${isMe?' me':''}">
+        <div class="lb-rank ${rankClass}">${i < 3 ? rankEmoji[i] : i+1}</div>
+        ${avatarHtml}
+        <div class="lb-name">${e.displayName}${isMe?' (คุณ)':''}</div>
+        <div class="lb-time">${formatTime(e.bestTime)}</div>
+      </div>`;
+    }).join('');
   }
-}
 
-function renderLeaderboard(entries) {
-  const list = document.getElementById('lb-list');
-  if (!entries.length) {
-    list.innerHTML = '<div class="lb-empty">ยังไม่มีคะแนน</div>';
-    return;
+  function playAgain() { showIntro(); }
+
+  // ─────────────────────────────────────────
+  // UTILS
+  // ─────────────────────────────────────────
+  function formatTime(ms) {
+    const s = Math.floor(ms / 1000);
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    const msDisp = Math.floor((ms % 1000) / 10);
+    if (m > 0) return `${m}:${String(sec).padStart(2,'0')}.${String(msDisp).padStart(2,'0')}`;
+    return `${String(sec).padStart(2,'0')}.${String(msDisp).padStart(2,'0')}`;
   }
-  const rankEmoji = ['🥇','🥈','🥉'];
-  list.innerHTML = entries.slice(0,10).map((e, i) => {
-    const isMe = e.userId === player.userId;
-    const rankClass = i < 3 ? `r${i+1}` : '';
-    const avatarHtml = e.pictureUrl
-      ? `<img class="lb-avatar" src="${e.pictureUrl}" onerror="this.outerHTML='<div class=\\'lb-avatar-fb\\'>${e.displayName.slice(0,2).toUpperCase()}</div>'">`
-      : `<div class="lb-avatar-fb">${(e.displayName||'?').slice(0,2).toUpperCase()}</div>`;
-    return `<div class="lb-row${isMe?' me':''}">
-      <div class="lb-rank ${rankClass}">${i < 3 ? rankEmoji[i] : i+1}</div>
-      ${avatarHtml}
-      <div class="lb-name">${e.displayName}${isMe?' (คุณ)':''}</div>
-      <div class="lb-time">${formatTime(e.bestTime)}</div>
-    </div>`;
-  }).join('');
-}
 
-function playAgain() { showIntro(); }
-
-// ─────────────────────────────────────────
-// UTILS
-// ─────────────────────────────────────────
-function formatTime(ms) {
-  const s = Math.floor(ms / 1000);
-  const m = Math.floor(s / 60);
-  const sec = s % 60;
-  const msDisp = Math.floor((ms % 1000) / 10);
-  if (m > 0) return `${m}:${String(sec).padStart(2,'0')}.${String(msDisp).padStart(2,'0')}`;
-  return `${String(sec).padStart(2,'0')}.${String(msDisp).padStart(2,'0')}`;
-}
-
-function launchConfetti() {
-  const colors = ['#FFD700','#0033CC','#FF4444','#00CC66','#FF8800','#FFFFFF'];
-  for (let i = 0; i < 60; i++) {
-    setTimeout(() => {
-      const p = document.createElement('div');
-      p.className = 'conf';
-      const sz = 6 + Math.random()*10;
-      p.style.cssText = `left:${Math.random()*100}vw;width:${sz}px;height:${sz}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'2px'};--d:${1.5+Math.random()*2}s;--dl:${Math.random()*.8}s;--tx:${(Math.random()-.5)*200}px;--r:${360+Math.random()*720}deg`;
-      document.body.appendChild(p);
-      setTimeout(() => p.remove(), 3500);
-    }, Math.random() * 600);
+  function launchConfetti() {
+    const colors = ['#FFD700','#0033CC','#FF4444','#00CC66','#FF8800','#FFFFFF'];
+    for (let i = 0; i < 60; i++) {
+      setTimeout(() => {
+        const p = document.createElement('div');
+        p.className = 'conf';
+        const sz = 6 + Math.random()*10;
+        p.style.cssText = `left:${Math.random()*100}vw;width:${sz}px;height:${sz}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'2px'};--d:${1.5+Math.random()*2}s;--dl:${Math.random()*.8}s;--tx:${(Math.random()-.5)*200}px;--r:${360+Math.random()*720}deg`;
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 3500);
+      }, Math.random() * 600);
+    }
   }
-}
 
-function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-  document.getElementById('s-' + name).classList.remove('hidden');
-}
-function showError(msg) {
-  document.getElementById('err-msg').innerHTML = msg;
-  showScreen('error');
-}
+  function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById('s-' + name).classList.remove('hidden');
+  }
+  function showError(msg) {
+    document.getElementById('err-msg').innerHTML = msg;
+    showScreen('error');
+  }
 
-async function callAPI(action, params) {
-  const q = new URLSearchParams({ action, ...params });
-  const r = await fetch(`${CONFIG.API_URL}?${q}`, { method:'GET' });
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  return r.json();
-}
-</script>
+  async function callAPI(action, params) {
+    const q = new URLSearchParams({ action, ...params });
+    const r = await fetch(`${CONFIG.API_URL}?${q}`, { method:'GET' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }
+  </script>
+
+  <div class="countdown-overlay" id="cd-overlay">
+    <div>
+      <div class="countdown-number" id="cd-number">3</div>
+    </div>
+  </div>
+  <div class="preview-banner" id="preview-banner" style="display:none">
+    <div class="preview-banner-text">👀 จำตำแหน่งการ์ดไว้ให้ดี!</div>
+  </div>
+
 </body>
 </html>
