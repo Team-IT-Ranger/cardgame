@@ -72,7 +72,8 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 
 <div class="container">
   <div class="header">
-    <span class="header-icon">🃏</span>
+    <img class="header-icon" src="card-back.png" 
+      style="width:80px;height:80px;object-fit:contain;display:block;margin:0 auto 8px">
     <div class="header-title">Memory Card</div>
     <div class="header-sub">Affiliate Challenge — สถิติดีที่สุด</div>
   </div>
@@ -88,7 +89,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 </div>
 
 <div class="strip">
-  <div class="strip-inner" id="strip-text">🏆 Memory Card Challenge — แข่งกันเลย! จับคู่สินค้าให้ครบ 8 คู่ให้เร็วที่สุด 🎮 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+  <div class="strip-inner" id="strip-text">🏆 Memory Card Challenge — แข่งกันเลย! จับคู่สินค้าให้ครบ 6 คู่ให้เร็วที่สุด 🎮 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
 </div>
 
 <script>
@@ -103,12 +104,19 @@ function formatTime(ms) {
   return `${String(sc).padStart(2,'0')}.${String(ms2).padStart(2,'0')}`;
 }
 
+
 function avatarHtml(entry, size, borderColor='transparent') {
-  if(entry.pictureUrl) {
-    return `<img class="lb-avatar" src="${entry.pictureUrl}" width="${size}" height="${size}" style="width:${size}px;height:${size}px;border:3px solid ${borderColor}" onerror="this.outerHTML=fallback('${entry.displayName}',${size},'${borderColor}')">`;
+  const initials = (entry.displayName||'?').slice(0,2).toUpperCase();
+  const fallback = `<div class="lb-avatar-fb" style="width:${size}px;height:${size}px;border:3px solid ${borderColor}">${initials}</div>`;
+  if (entry.pictureUrl) {
+    return `<img class="lb-avatar" src="${entry.pictureUrl}" 
+      width="${size}" height="${size}" 
+      style="width:${size}px;height:${size}px;border:3px solid ${borderColor}"
+      onerror="this.outerHTML='${fallback.replace(/'/g,"\\'")}'">`;
   }
-  return `<div class="lb-avatar-fb" style="width:${size}px;height:${size}px;border:3px solid ${borderColor}">${(entry.displayName||'?').slice(0,2).toUpperCase()}</div>`;
+  return fallback;
 }
+
 
 async function load() {
   try {
