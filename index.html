@@ -29,7 +29,12 @@
 
   /* ── LOADING ── */
   #s-loading{background:var(--bg)}
-  .ld-icon{font-size:3.5rem;animation:bounce .8s ease-in-out infinite alternate}
+  .ld-icon{
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    animation: bounce .8s ease-in-out infinite alternate;
+  }
   @keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-12px)}}
   .ld-title{font-size:1.8rem;font-weight:900;color:var(--gold);letter-spacing:1px}
   .ld-bar{width:180px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin-top:8px}
@@ -238,7 +243,7 @@
 
   <!-- LOADING -->
   <div class="screen" id="s-loading">
-    <div class="ld-icon">🃏</div>
+    <img class="ld-icon" src="card-back.png" alt="card">
     <div class="ld-title">Memory Card</div>
     <div style="font-size:.85rem;color:var(--text-muted);font-family:'Sarabun',sans-serif">Affiliate Challenge</div>
     <div class="ld-bar"><div class="ld-fill"></div></div>
