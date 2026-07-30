@@ -1,219 +1,831 @@
 <!DOCTYPE html>
 <html lang="th">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="30"> <!-- auto-refresh ทุก 30 วินาที -->
-    <title>Leaderboard — Memory Card</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700;800;900&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <style>
-    :root{
-      --brand:#0033CC;--gold:#FFD700;--gold-dark:#E6B800;
-      --bg:#000D33;--bg2:#060E2E;--bg3:#0A1540;
-      --text:#fff;--muted:rgba(255,255,255,.55);
-    }
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ranger — Affiliate Game</title>
+<script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700;800;900&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand:#0033CC; --brand-dark:#001F80; --brand-light:#1A4FE8;
+    --gold:#FFD700; --gold-dark:#E6B800;
+    --bg:#000D33; --bg2:#060E2E; --bg3:#0A1540;
+    --text:#FFFFFF; --text-muted:rgba(255,255,255,0.55);
+    --success:#00CC66; --danger:#FF4444;
+    --card-back:#0A2080; --card-front:#FFFFFF;
+    --radius:14px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+  body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
 
-    /* Animated bg */
-    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,51,204,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,51,204,.06) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
+  /* ── BG particles ── */
+  .bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(0,51,204,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,51,204,0.07) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
 
-    .container{max-width:700px;margin:0 auto;padding:32px 20px}
+  /* ── SCREENS ── */
+  .screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;padding:20px;gap:16px;transition:opacity .35s ease,transform .35s ease}
+  .screen.hidden{opacity:0;pointer-events:none;transform:scale(.97)}
 
-    /* Header */
-    .header{text-align:center;margin-bottom:40px}
-    .header-icon{font-size:4rem;display:block;margin-bottom:8px}
-    .header-title{font-size:2.8rem;font-weight:900;color:var(--gold);text-shadow:0 0 30px rgba(255,215,0,.3);letter-spacing:1px}
-    .header-sub{font-size:1rem;color:var(--muted);margin-top:4px;font-family:'Sarabun',sans-serif}
+  /* ── LOADING ── */
+  #s-loading{background:var(--bg)}
+  .ld-icon{
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    animation: bounce .8s ease-in-out infinite alternate;
+  }
+  @keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+  .ld-title{font-size:1.8rem;font-weight:900;color:var(--gold);letter-spacing:1px}
+  .ld-bar{width:180px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin-top:8px}
+  .ld-fill{height:100%;background:linear-gradient(90deg,var(--brand),var(--gold));border-radius:2px;animation:ldfill 2s ease forwards}
+  @keyframes ldfill{from{width:0}to{width:100%}}
 
-    /* Top 3 podium */
-    .podium{display:flex;align-items:flex-end;justify-content:center;gap:12px;margin-bottom:36px}
-    .podium-item{display:flex;flex-direction:column;align-items:center;gap:8px}
-    .podium-avatar{border-radius:50%;object-fit:cover;border:3px solid;box-shadow:0 0 20px currentColor}
-    .podium-avatar-fb{border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:800;color:white;border:3px solid}
-    .podium-name{font-size:.85rem;font-weight:700;text-align:center;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .podium-time{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
-    .podium-stand{border-radius:8px 8px 0 0;width:90px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:900}
-    .p1 .podium-avatar,.p1 .podium-avatar-fb{width:72px;height:72px;border-color:var(--gold);font-size:1.5rem}
-    .p1 .podium-stand{height:90px;background:linear-gradient(180deg,#FFD700,#E6B800)}
-    .p2 .podium-avatar,.p2 .podium-avatar-fb{width:60px;height:60px;border-color:#C0C0C0;font-size:1.2rem}
-    .p2 .podium-stand{height:70px;background:linear-gradient(180deg,#C0C0C0,#A0A0A0)}
-    .p3 .podium-avatar,.p3 .podium-avatar-fb{width:52px;height:52px;border-color:#CD7F32;font-size:1rem}
-    .p3 .podium-stand{height:55px;background:linear-gradient(180deg,#CD7F32,#A05A20)}
+  /* ── INTRO ── */
+  #s-intro{
+    background:var(--bg);
+    text-align:center;
+    gap:8px;
+    padding:16px;
+    justify-content:center;
+    overflow-y:auto;
+  }
+  .player-avatar{width:52px;height:52px;border-radius:50%;border:3px solid var(--gold);object-fit:cover}
+  .player-avatar-fallback{width:52px;height:52px;border-radius:50%;border:3px solid var(--gold);background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;color:white}
+  .player-name{font-size:1rem;font-weight:700;margin-top:0}
+  .player-sub{font-size:.75rem;color:var(--text-muted);font-family:'Sarabun',sans-serif}
+  .intro-title{font-size:1.5rem;font-weight:800;color:var(--gold);line-height:1.2}
+  .intro-rules{
+    background:var(--bg3);border:1px solid rgba(255,255,255,.08);
+    border-radius:var(--radius);padding:8px 14px;
+    width:100%;max-width:320px;text-align:left;
+  }
+  .rule-row{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:.78rem;color:rgba(255,255,255,.8);font-family:'Sarabun',sans-serif}
+  .rule-icon{font-size:.95rem;flex-shrink:0}
+  .best-time-badge{
+    background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.3);
+    border-radius:8px;padding:5px 14px;font-size:.78rem;color:var(--gold);
+  }
 
-    /* Rest of leaderboard */
-    .lb-list{display:flex;flex-direction:column;gap:8px;margin-bottom:32px}
-    .lb-row{display:flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 16px;transition:background .2s}
-    .lb-row.highlight{border-color:rgba(255,215,0,.2);background:rgba(255,215,0,.05)}
-    .lb-rank{font-size:1rem;font-weight:800;width:28px;text-align:center;color:var(--muted);flex-shrink:0}
-    .lb-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0}
-    .lb-avatar-fb{width:40px;height:40px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;flex-shrink:0}
-    .lb-info{flex:1;min-width:0}
-    .lb-name{font-size:1rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .lb-plays{font-size:.72rem;color:var(--muted);font-family:'Sarabun',sans-serif}
-    .lb-time{font-size:1.1rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;flex-shrink:0}
+  /* ── Rank info boxes ── */
+  .rank-box{
+    width:100%;max-width:320px;
+    background:rgba(255,215,0,0.08);
+    border:1px solid rgba(255,215,0,0.25);
+    border-radius:10px;padding:8px 14px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .rank-box.me{
+    background:rgba(0,51,204,0.2);
+    border-color:rgba(0,51,204,0.4);
+  }
+  .rank-box-icon{font-size:1.4rem;flex-shrink:0}
+  .rank-box-label{font-size:.62rem;color:var(--text-muted);letter-spacing:1px}
+  .rank-box-name{font-size:.85rem;font-weight:700}
+  .rank-box-val{font-size:1.1rem;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums;flex-shrink:0}
+  .rank-box.me .rank-box-val{color:#00AAFF}
 
-    /* Footer */
-    .footer{text-align:center}
-    .footer-qr-label{font-size:.85rem;color:var(--muted);margin-bottom:8px;font-family:'Sarabun',sans-serif}
-    .footer-url{font-size:1rem;font-weight:700;color:var(--gold)}
-    .refresh-note{font-size:.72rem;color:var(--muted);margin-top:12px;font-family:'Sarabun',sans-serif}
+  /* ── START BUTTON — 3D physical feel ── */
+  .start-btn{
+    width:100%;max-width:280px;height:56px;
+    background:linear-gradient(180deg,#FFE566 0%,var(--gold) 40%,var(--gold-dark) 100%);
+    border:none;
+    border-radius:16px;
+    font-family:'Kanit',sans-serif;font-size:1.25rem;font-weight:800;
+    color:var(--brand-dark);
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+    /* 3D shadow — top light + bottom dark */
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.4) inset,
+      0 -2px 0 rgba(0,0,0,.2) inset,
+      0 8px 0 #B8920A,
+      0 10px 16px rgba(0,0,0,.4);
+    transition:
+      transform .08s ease,
+      box-shadow .08s ease;
+  }
+  .start-btn::before{
+    content:'';position:absolute;top:-50%;left:-100%;
+    width:60%;height:200%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
+    animation:shimmer 2.5s ease-in-out infinite;
+  }
+  @keyframes shimmer{0%{left:-100%}60%,100%{left:160%}}
+  .start-btn:hover{
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.4) inset,
+      0 -2px 0 rgba(0,0,0,.2) inset,
+      0 10px 0 #B8920A,
+      0 14px 20px rgba(0,0,0,.4);
+    transform:translateY(-2px);
+  }
+  .start-btn:active{
+    /* กดลง — เลื่อนลงตามเงา */
+    transform:translateY(6px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.3) inset,
+      0 -1px 0 rgba(0,0,0,.2) inset,
+      0 2px 0 #B8920A,
+      0 4px 8px rgba(0,0,0,.3);
+  }
 
-    /* Loading/Error */
-    .center-msg{text-align:center;padding:60px 20px;color:var(--muted);font-family:'Sarabun',sans-serif;font-size:1.1rem}
+  /* ── GAME ── */
+  #s-game{
+    background:var(--bg);
+    justify-content:flex-start;
+    padding:8px 8px 8px;
+    height:100vh;
+    height:100dvh;
+    overflow:hidden;
+  }
+  .game-header{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 4px 6px;
+    flex-shrink:0;
+    height:48px;
+  }
+  .gh-player{display:flex;align-items:center;gap:8px}
+  .gh-avatar{width:32px;height:32px;border-radius:50%;border:2px solid var(--gold);object-fit:cover}
+  .gh-avatar-fb{width:32px;height:32px;border-radius:50%;border:2px solid var(--gold);background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:white}
+  .gh-name{font-size:.85rem;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .timer-display{display:flex;flex-direction:column;align-items:center}
+  .timer-label{font-size:.6rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase}
+  .timer-val{font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums;color:var(--gold);line-height:1}
+  .pairs-info{text-align:right}
+  .pairs-val{font-size:1.3rem;font-weight:800;color:var(--success)}
+  .pairs-label{font-size:.6rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase}
 
-    /* Marquee strip */
-    .strip{background:var(--gold);color:var(--brand);font-weight:800;font-size:.85rem;padding:8px 0;overflow:hidden;white-space:nowrap;position:fixed;bottom:0;left:0;right:0;z-index:10}
-    .strip-inner{display:inline-block;animation:marquee 20s linear infinite}
-    @keyframes marquee{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
-    </style>
-  </head>
-  <body>
+  /* ── BOARD ── */
+  .board{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(4,1fr);
+    gap:8px;
+    width:100%;
+    flex:1;
+    min-height:0;
+    overflow:hidden;
+  }
+  .card{
+    position:relative;
+    cursor:pointer;
+    min-height:0;
+    min-width:0;
+    overflow:hidden;
+  }
+  .card-inner{
+    position:absolute;
+    inset:0;
+    transform-style:preserve-3d;
+    //transition:transform .2s cubic-bezier(.4,0,.2,1);
+    transition:transform .2s ease;
 
-    <div class="container">
-      <div class="header">
-        <img class="header-icon" src="card-back.png" 
-          style="width:80px;height:80px;object-fit:contain;display:block;margin:0 auto 8px">
-        <div class="header-title">Memory Card</div>
-        <div class="header-sub">Affiliate Challenge — สถิติดีที่สุด</div>
-      </div>
+  }
+  .card.flipped .card-inner{transform:rotateY(180deg)}
+  .card.matched .card-inner{transform:rotateY(180deg)}
+  .card-face{
+    position:absolute;
+    inset:0;
+    border-radius:10px;
+    backface-visibility:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }  
+  .card-back{
+  background: #000 url('card-back.png') center/contain no-repeat;
+  border:2px solid rgba(255,215,0,.4);
+  box-shadow:inset 0 0 12px rgba(255,215,0,.15);
+  }
+  //.card-back-pattern{font-size:1.4rem;opacity:.5;user-select:none}
+  .card-front{
+    background: #000;
+    transform: rotateY(180deg);
+    border: none;
+    padding: 0;
+  }
 
-      <div id="podium-wrap" class="podium" style="display:none"></div>
-      <div id="lb-wrap" class="lb-list"></div>
+  .card-front img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+    background: #000;
+  }
 
-      <div class="footer">
+  .card-front .card-emoji{font-size:2rem}
+  .card.matched .card-face.card-front{background:#e8fff4;border-color:var(--success)}
+  .card.matched .card-face.card-front::after{content:'✓';position:absolute;top:4px;right:6px;font-size:.75rem;color:var(--success);font-weight:800}
+  .card:not(.flipped):not(.matched):hover .card-back{border-color:rgba(255,215,0,.4)}
+  .card.wrong .card-inner{animation:wrong-shake .4s ease}
+  @keyframes wrong-shake{0%,100%{transform:rotateY(180deg)}20%{transform:rotateY(180deg) translateX(-4px)}60%{transform:rotateY(180deg) translateX(4px)}}
 
-        <button onclick="playAgain()" style="
-          width:100%;max-width:320px;height:56px;
-          background:linear-gradient(135deg,var(--gold),var(--gold-dark));
-          border:none;border-radius:28px;
-          font-family:'Kanit',sans-serif;font-size:1.2rem;font-weight:800;
-          color:#001F80;cursor:pointer;
-          box-shadow:0 6px 24px rgba(255,215,0,.35);
-          display:block;margin:0 auto 24px;
-          transition:transform .15s">
-          🎮 เล่นอีกครั้ง
-        </button>
+  /* ── WIN SCREEN ── */
+  #s-win{background:var(--bg);text-align:center;overflow-y:auto;justify-content:flex-start;padding-top:32px}
+  .win-inner{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:340px;padding-bottom:32px}
+  .win-trophy{font-size:4rem;animation:pop .5s cubic-bezier(.34,1.56,.64,1) both}
+  @keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+  .win-title{font-size:2rem;font-weight:900;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fadein .5s ease .2s both}
+  @keyframes fadein{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .win-time-card{background:var(--bg3);border:1px solid rgba(255,215,0,.3);border-radius:var(--radius);padding:16px 28px;animation:fadein .5s ease .3s both;width:100%}
+  .wt-label{font-size:.75rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase}
+  .wt-time{font-size:2.8rem;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1.1}
+  .wt-best{font-size:.8rem;color:var(--success);margin-top:4px;font-family:'Sarabun',sans-serif}
+  .wt-prev{font-size:.8rem;color:var(--text-muted);margin-top:2px;font-family:'Sarabun',sans-serif}
 
-        <div class="footer-qr-label">สแกนเพื่อเล่น</div>
-        <div id="qr-code" style="background:white;padding:12px;border-radius:12px;display:inline-block;margin:8px auto"></div>
-        <div class="footer-url">https://liff.line.me/2010102212-gfhenzK0</div>
-        <div class="refresh-note">หน้านี้จะอัปเดตอัตโนมัติทุก 30 วินาที</div>
+  /* Leaderboard */
+  .lb-title{font-size:.8rem;font-weight:700;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;align-self:flex-start;animation:fadein .5s ease .4s both}
+  .lb-list{width:100%;display:flex;flex-direction:column;gap:8px;animation:fadein .5s ease .45s both}
+  .lb-row{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 14px}
+  .lb-row.me{border-color:rgba(255,215,0,.35);background:rgba(255,215,0,.06)}
+  .lb-rank{font-size:1rem;font-weight:800;width:24px;text-align:center;flex-shrink:0}
+  .lb-rank.r1{color:var(--gold)}
+  .lb-rank.r2{color:#C0C0C0}
+  .lb-rank.r3{color:#CD7F32}
+  .lb-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0}
+  .lb-avatar-fb{width:30px;height:30px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;flex-shrink:0}
+  .lb-name{font-size:.88rem;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lb-time{font-size:.9rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;flex-shrink:0}
+  .lb-empty{text-align:center;padding:20px;color:var(--text-muted);font-family:'Sarabun',sans-serif;font-size:.9rem}
 
-      </div>
+  .play-again-btn{width:100%;height:52px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;border-radius:26px;font-family:'Kanit',sans-serif;font-size:1.1rem;font-weight:800;color:var(--brand-dark);cursor:pointer;box-shadow:0 6px 20px rgba(255,215,0,.3);transition:transform .15s;animation:fadein .5s ease .6s both}
+  .play-again-btn:hover{transform:translateY(-2px)}
+  .play-again-btn:active{transform:scale(.98)}
 
+  /* ERROR */
+  #s-error{text-align:center}
+  .err-icon{font-size:3.5rem}
+  .err-title{font-size:1.5rem;font-weight:800;color:var(--danger)}
+  .err-desc{font-size:.9rem;color:var(--text-muted);font-family:'Sarabun',sans-serif;line-height:1.6}
+  .retry-btn{padding:12px 32px;background:var(--brand);border:none;border-radius:24px;color:white;font-family:'Kanit',sans-serif;font-size:1rem;font-weight:700;cursor:pointer}
+
+  /* Confetti */
+  .conf{position:fixed;top:-20px;pointer-events:none;z-index:200;animation:conf-fall var(--d) linear var(--dl) forwards}
+  @keyframes conf-fall{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--tx),110vh) rotate(var(--r));opacity:0}}
+
+  /* Countdown overlay */
+  .countdown-overlay{
+    position:fixed;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(0,13,51,0.75);
+    backdrop-filter:blur(3px);
+    z-index:100;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .3s;
+  }
+  .countdown-overlay.show{opacity:1}
+  .countdown-number{
+    font-size:30vw;
+    font-weight:900;
+    color:var(--gold);
+    text-shadow:0 0 60px rgba(255,215,0,.6);
+    animation:cd-pop .8s cubic-bezier(.34,1.56,.64,1) both;
+    line-height:1;
+  }
+  @keyframes cd-pop{
+    0%{transform:scale(2);opacity:0}
+    100%{transform:scale(1);opacity:1}
+  }
+  .preview-banner{
+    position:fixed;top:70px;left:0;right:0;
+    text-align:center;z-index:101;pointer-events:none;
+  }
+  .preview-banner-text{
+    display:inline-block;
+    background:rgba(0,51,204,.85);
+    border:1px solid var(--gold);
+    border-radius:20px;
+    padding:6px 20px;
+    font-size:.9rem;font-weight:700;
+    color:var(--gold);
+    backdrop-filter:blur(4px);
+  }
+
+</style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <!-- LOADING -->
+  <div class="screen" id="s-loading">
+    <img class="ld-icon" src="card-back.png" alt="card">
+    <div class="ld-title">Memory Challenge</div>
+    <div style="font-size:.85rem;color:var(--text-muted);font-family:'Sarabun',sans-serif">Affiliate Challenge</div>
+    <div class="ld-bar"><div class="ld-fill"></div></div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="screen hidden" id="s-intro">
+    <div></div>
+    <div class="intro-title">
+      Memory  <img src="card-back.png" style="width:36px;height:36px;object-fit:contain;vertical-align:middle;margin-right:6px">Challenge
+    </div>
+    <div id="avatar-wrap"></div>
+    <div class="player-name" id="player-name">–</div>
+
+    <div class="intro-rules">
+      <div class="rule-row"><span class="rule-icon">🔄</span>พลิกจับคู่ภาพให้ครบ 6 คู่</div>
+      <div class="rule-row"><span class="rule-icon">🏆</span>เวลาดีที่สุดจะถูกบันทึกใน Leaderboard</div>
+      <div class="rule-row"><span class="rule-icon">⚡</span>เล่นซ้ำได้ไม่จำกัด</div>
     </div>
 
-    <div class="strip">
-      <div class="strip-inner" id="strip-text">🏆 Memory Card Challenge — แข่งกันเลย! จับคู่สินค้าให้ครบ 6 คู่ให้เร็วที่สุด 🎮 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+    <div class="best-time-badge" id="best-badge" style="display:none">
+      🥇 สถิติของคุณ: <strong id="best-time-disp">–</strong>
     </div>
 
-    <script>
-      const API_URL = 'https://script.google.com/macros/s/AKfycbzOzuWgbakgVyPfE0jFm0LCXgrz-aCMwi0ti1YpaoDVXJNX6uUblm0Y4AxML25ghFeI/exec';
+    <!-- อันดับ -->
+    <div id="rank-info" style="width:100%;max-width:320px;display:none;display:flex;flex-direction:column;gap:6px">
+      <div class="rank-box">
+        <div class="rank-box-icon">🥇</div>
+        <div style="flex:1">
+          <div class="rank-box-label">สถิติอันดับ 1</div>
+          <div class="rank-box-name" id="rank1-name">–</div>
+        </div>
+        <div class="rank-box-val" id="rank1-time">–</div>
+      </div>
+      <div class="rank-box me">
+        <div class="rank-box-icon">🎯</div>
+        <div style="flex:1">
+          <div class="rank-box-label">อันดับของคุณ</div>
+          <div class="rank-box-name" id="my-rank-text">–</div>
+        </div>
+        <div class="rank-box-val" id="my-rank-num" style="color:#00AAFF">–</div>
+      </div>
+    </div>
 
-      function formatTime(ms) {
-        const s  = Math.floor(ms/1000);
-        const m  = Math.floor(s/60);
-        const sc = s%60;
-        const ms2 = Math.floor((ms%1000)/10);
-        if(m>0) return `${m}:${String(sc).padStart(2,'0')}.${String(ms2).padStart(2,'0')}`;
-        return `${String(sc).padStart(2,'0')}.${String(ms2).padStart(2,'0')}`;
-      }
+    <button class="start-btn" onclick="startGame()">🚀 เริ่มเล่น!</button>
+  </div>
+
+  <!-- GAME -->
+  <div class="screen hidden" id="s-game">
+    <div class="game-header">
+      <div class="gh-player">
+        <div id="gh-avatar-wrap"></div>
+        <div class="gh-name" id="gh-name">–</div>
+      </div>
+      <div class="timer-display">
+        <div class="timer-label">เวลา</div>
+        <div class="timer-val" id="timer">00:00</div>
+      </div>
+      <div class="pairs-info">
+        <div class="pairs-val"><span id="pairs-found">0</span>/6</div>
+        <div class="pairs-label">คู่</div>
+      </div>
+    </div>
+    <div class="board" id="board"></div>
+  </div>
+
+  <!-- WIN -->
+  <div class="screen hidden" id="s-win">
+    <div class="win-inner">
+      <div class="win-trophy" id="win-trophy">🏆</div>
+      <div class="win-title" id="win-title">จับคู่ครบแล้ว!</div>
+
+      <div class="win-time-card">
+        <div class="wt-label">เวลาที่ใช้</div>
+        <div class="wt-time" id="win-time">–</div>
+        <div class="wt-best" id="win-best" style="display:none">🎉 เวลาดีที่สุดใหม่!</div>
+        <div class="wt-prev" id="win-prev" style="display:none"></div>
+      </div>
+
+      <div class="lb-title">🏆 Leaderboard</div>
+      <div class="lb-list" id="lb-list"><div class="lb-empty">กำลังโหลด...</div></div>
+
+      <button class="play-again-btn" onclick="playAgain()">🔄 เล่นอีกครั้ง</button>
+
+      <button onclick="window.open('leaderboard.html','_blank')" 
+        style="width:100%;height:52px;
+        background:transparent;
+        border:2px solid var(--gold);
+        border-radius:26px;
+        font-family:'Kanit',sans-serif;
+        font-size:1.1rem;font-weight:700;
+        color:var(--gold);cursor:pointer;
+        transition:all .2s;
+        animation:fadein .5s ease .7s both">
+        🏆 ดู Leaderboard
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="screen hidden" id="s-error">
+    <div class="err-icon">⚠️</div>
+    <div class="err-title">เกิดข้อผิดพลาด</div>
+    <div class="err-desc" id="err-msg">ไม่สามารถเชื่อมต่อได้</div>
+    <button class="retry-btn" onclick="location.reload()">ลองใหม่</button>
+  </div>
+
+  <div class="countdown-overlay" id="cd-overlay">
+    <div>
+      <div class="countdown-number" id="cd-number">3</div>
+    </div>
+  </div>
+  <div class="preview-banner" id="preview-banner" style="display:none">
+    <div class="preview-banner-text">👀 จำตำแหน่งการ์ดไว้แล้วไปเล่นเลย!</div>
+  </div>
+
+  <script>
+    // ─────────────────────────────────────────
+    // CONFIG — แก้ตามระบบจริง
+    // ─────────────────────────────────────────
+    const CONFIG = {
+      LIFF_ID: '2010102212-gfhenzK0',
+      API_URL:  'https://script.google.com/macros/s/AKfycbzOzuWgbakgVyPfE0jFm0LCXgrz-aCMwi0ti1YpaoDVXJNX6uUblm0Y4AxML25ghFeI/exec',
+      DEMO_MODE: false
+    };
+
+    // ─────────────────────────────────────────
+    // CARD DATA — แก้ imageUrl เป็น URL รูปจริง
+    // วางรูปบน Google Drive (share as public)
+    // หรือ GitHub repo แล้วใช้ raw URL
+    // ─────────────────────────────────────────
+    const CARD_DATA = [
+      { id:1,  name:'สินค้า 01', emoji:'🛡️', imageUrl:'img/01.png' },
+      { id:2,  name:'สินค้า 02', emoji:'⏰', imageUrl:'img/02.png' },
+      { id:3,  name:'สินค้า 03', emoji:'🌿', imageUrl:'img/03.png' },
+      { id:4,  name:'สินค้า 04', emoji:'⭐', imageUrl:'img/04.png' },
+      { id:5,  name:'สินค้า 05', emoji:'📺', imageUrl:'img/05.png' },
+      { id:6,  name:'สินค้า 06', emoji:'🎫', imageUrl:'img/06.png' },
+      { id:7,  name:'สินค้า 07', emoji:'🆕', imageUrl:'img/07.png' },
+      { id:8,  name:'สินค้า 08', emoji:'💎', imageUrl:'img/08.png' },
+      { id:9,  name:'สินค้า 09', emoji:'🎁', imageUrl:'img/09.png' },
+      { id:10, name:'สินค้า 10', emoji:'🔥', imageUrl:'img/10.png' },
+      { id:11, name:'สินค้า 11', emoji:'📺', imageUrl:'img/11.png' },
+      { id:12, name:'สินค้า 12', emoji:'🛡️', imageUrl:'img/12.png' },
+      { id:13, name:'สินค้า 13', emoji:'🌿', imageUrl:'img/13.png' },
+      { id:14, name:'สินค้า 14', emoji:'⭐', imageUrl:'img/14.png' },
+      { id:15, name:'สินค้า 15', emoji:'📺', imageUrl:'img/15.png' },
+      { id:16, name:'สินค้า 16', emoji:'🎫', imageUrl:'img/16.png' },
+      { id:17, name:'สินค้า 17', emoji:'🆕', imageUrl:'img/17.png' },
+      { id:18, name:'สินค้า 18', emoji:'💎', imageUrl:'img/18.png' },
+      { id:19, name:'สินค้า 19', emoji:'🎁', imageUrl:'img/19.png' },
+      { id:20, name:'สินค้า 20', emoji:'🔥', imageUrl:'img/20.png' },
+      { id:21, name:'สินค้า 21', emoji:'📺', imageUrl:'img/21.png' },
+      { id:22, name:'สินค้า 22', emoji:'🛡️', imageUrl:'img/22.png' },
+    ];
 
 
-      function avatarHtml(entry, size, borderColor='transparent') {
-        const initials = (entry.displayName||'?').slice(0,2).toUpperCase();
-        if (entry.pictureUrl) {
-          return `<img class="lb-avatar" src="${entry.pictureUrl}"
-            style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;border:3px solid ${borderColor}"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-            <div class="lb-avatar-fb" style="width:${size}px;height:${size}px;border:3px solid ${borderColor};display:none">${initials}</div>`;
-        }
-        return `<div class="lb-avatar-fb" style="width:${size}px;height:${size}px;border:3px solid ${borderColor}">${initials}</div>`;
-      }
+    const PAIRS = 6; // จำนวนคู่ต่อเกม (3x4 = 6 คู่)
+    // ─────────────────────────────────────────
+    // STATE
+    // ─────────────────────────────────────────
+    let player   = { userId:'', displayName:'', pictureUrl:'' };
+    let bestTime = null;        // ms
+    let timerMs  = 0;
+    let timerInterval = null;
+    let flipped  = [];          // [{el, id}]
+    let matched  = new Set();
+    let isLocked = false;
+    let gameStarted = false;
+    let cardDefs = [];          // shuffled card definitions
 
-      async function load() {
+    // ─────────────────────────────────────────
+    // INIT
+    // ─────────────────────────────────────────
+    window.addEventListener('load', async () => {
+      await new Promise(r => setTimeout(r, 1800)); // loading anim
+
+      if (CONFIG.DEMO_MODE) {
+        player = { userId:'DEMO_001', displayName:'ทดสอบระบบ', pictureUrl:'' };
+        await fetchBestTime();
+        showIntro();
+      } else {
         try {
-          const r = await fetch(`${API_URL}?action=getLeaderboard`);
-          const text = await r.text();
-          const d = JSON.parse(text);
+          await liff.init({ liffId: CONFIG.LIFF_ID });
+          if (!liff.isLoggedIn()) { liff.login(); return; }
+          const p = await liff.getProfile();
+          player = { userId: p.userId, displayName: p.displayName, pictureUrl: p.pictureUrl };
+          await fetchBestTime();
+          showIntro();
+        } catch(e) { showError('ไม่สามารถเชื่อมต่อ Line ได้<br>' + e.message); }
+      }
+    });
 
-          if (!d.success || !d.entries || !d.entries.length) {
-            document.getElementById('lb-wrap').innerHTML =
-              '<div class="center-msg">ยังไม่มีคะแนน — มาเล่นกันเลย! 🎮</div>';
-            return;
-          }
+    async function fetchBestTime() {
+      try {
+        const r = await callAPI('getBest', { userId: player.userId });
+        if (r.bestTime) bestTime = r.bestTime;
+      } catch(e) { /* ไม่มี record ยังไม่เคยเล่น */ }
+    }
 
-          const entries = d.entries;
-          const top3 = entries.slice(0, 3);
-          const rest = entries.slice(3);
+    // ─────────────────────────────────────────
+    // INTRO
+    // ─────────────────────────────────────────
+    async function showIntro() {
+      setAvatarEl('avatar-wrap', player.pictureUrl, player.displayName, 72);
+      setAvatarEl('gh-avatar-wrap', player.pictureUrl, player.displayName, 32);
+      document.getElementById('player-name').textContent = player.displayName;
+      document.getElementById('gh-name').textContent = player.displayName;
 
-          // Podium
-          const podiumWrap = document.getElementById('podium-wrap');
-          if (top3.length >= 1) {
-            podiumWrap.style.display = 'flex';
-            const order   = top3.length >= 3 ? [top3[1],top3[0],top3[2]] : top3.length === 2 ? [top3[1],top3[0]] : [top3[0]];
-            const classes = top3.length >= 3 ? ['p2','p1','p3'] : top3.length === 2 ? ['p2','p1'] : ['p1'];
-
-            podiumWrap.innerHTML = order.map((e, i) => {
-              const cls  = classes[i];
-              const sz   = cls==='p1'?72:cls==='p2'?60:52;
-              const bCol = cls==='p1'?'#FFD700':cls==='p2'?'#C0C0C0':'#CD7F32';
-              const h    = cls==='p1'?90:cls==='p2'?70:55;
-              const med  = cls==='p1'?'🥇':cls==='p2'?'🥈':'🥉';
-              return `<div class="podium-item ${cls}">
-                ${avatarHtml(e, sz, bCol)}
-                <div class="podium-name">${e.displayName}</div>
-                <div class="podium-time">${formatTime(e.bestTime)}</div>
-                <div class="podium-stand" style="height:${h}px">${med}</div>
-              </div>`;
-            }).join('');
-          }
-
-          // Rest
-          document.getElementById('lb-wrap').innerHTML = rest.map((e, i) => `
-            <div class="lb-row">
-              <div class="lb-rank">${i+4}</div>
-              ${avatarHtml(e, 40)}
-              <div class="lb-info">
-                <div class="lb-name">${e.displayName}</div>
-                <div class="lb-plays">เล่นแล้ว ${e.playCount} ครั้ง</div>
-              </div>
-              <div class="lb-time">${formatTime(e.bestTime)}</div>
-            </div>`).join('');
-
-          // Marquee
-          document.getElementById('strip-text').textContent =
-            `🏆 อันดับ 1: ${entries[0].displayName} — ${formatTime(entries[0].bestTime)}    🎮 Memory Card Challenge — แข่งกันเลย!    จับคู่สินค้าให้ครบ 6 คู่ให้เร็วที่สุด 🃏     `;
-
-        } catch(e) {
-          document.getElementById('lb-wrap').innerHTML =
-            `<div class="center-msg">โหลดไม่ได้: ${e.message}</div>`;
-          console.error(e);
-        }
+      if (bestTime !== null) {
+        document.getElementById('best-badge').style.display = 'block';
+        document.getElementById('best-time-disp').textContent = formatTime(bestTime);
       }
 
+      // ✅ autostart จาก leaderboard
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('autostart') === 'true') {
+        startGame();
+        return;
+      }
 
-      function playAgain() {
-        const liffUrl = 'https://liff.line.me/2010102212-gfhenzK0?autostart=true';
-        if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
-          liff.openWindow({ url: liffUrl, external: false });
+      showScreen('intro');
+
+      // โหลดอันดับ
+      try {
+        const lb = await callAPI('getLeaderboard', {});
+        const entries = lb.entries || [];
+        if (entries.length > 0) {
+          document.getElementById('rank1-name').textContent = entries[0].displayName;
+          document.getElementById('rank1-time').textContent = formatTime(entries[0].bestTime);
+          const myRank = entries.findIndex(e => e.userId === player.userId) + 1;
+          document.getElementById('my-rank-num').textContent = myRank > 0 ? `#${myRank}` : '–';
+          document.getElementById('my-rank-text').textContent =
+            myRank === 1 ? 'คุณคือแชมป์! 🏆' :
+            myRank <= 3  ? 'Top 3 เยี่ยมมาก! 🎉' :
+            myRank > 0   ? `จาก ${entries.length} คน` : 'ยังไม่มีสถิติ เริ่มเลย!';
+          document.getElementById('rank-info').style.display = 'block';
+        }
+      } catch(e) { /* ไม่แสดงถ้าโหลดไม่ได้ */ }
+    }
+
+
+    function setAvatarEl(containerId, pictureUrl, name, size) {
+      const wrap = document.getElementById(containerId);
+      wrap.innerHTML = '';
+      if (pictureUrl) {
+        const img = document.createElement('img');
+        img.src = pictureUrl;
+        img.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;border:${size>40?'3':'2'}px solid var(--gold);object-fit:cover`;
+        img.onerror = () => { wrap.innerHTML = fallbackAvatar(name, size); };
+        wrap.appendChild(img);
+      } else {
+        wrap.innerHTML = fallbackAvatar(name, size);
+      }
+    }
+
+    function fallbackAvatar(name, size) {
+      const initials = name ? name.slice(0,2).toUpperCase() : '??';
+      return `<div style="width:${size}px;height:${size}px;border-radius:50%;border:${size>40?'3':'2'}px solid var(--gold);background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:${size*.35}px;font-weight:800;color:white">${initials}</div>`;
+    }
+
+    // ─────────────────────────────────────────
+    // GAME
+    // ─────────────────────────────────────────
+    function startGame() {
+      clearInterval(timerInterval);
+      timerMs = 0; flipped = []; matched = new Set();
+      isLocked = true; gameStarted = false;
+      document.getElementById('timer').textContent = '00:00';
+      document.getElementById('pairs-found').textContent = '0';
+
+      // สุ่ม 6 ไอเทมจาก CARD_DATA
+      const picked = [...CARD_DATA]
+        .sort(() => Math.random() - .5)
+        .slice(0, PAIRS);
+      cardDefs = [...picked, ...picked]
+        .map((c, i) => ({ ...c, uid: i }))
+        .sort(() => Math.random() - .5);
+
+      buildBoard();
+      showScreen('game');
+
+      // เปิดไพ่ทั้งหมดให้ดูก่อน
+      setTimeout(() => previewCards(), 100);
+    }
+
+
+    function previewCards() {
+      document.querySelectorAll('.card').forEach(c => c.classList.add('flipped'));
+      document.getElementById('preview-banner').style.display = 'block';
+
+      const overlay = document.getElementById('cd-overlay');
+      const numEl   = document.getElementById('cd-number');
+      let count = 3;
+
+      function showCount() {
+        if (count > 0) {
+          // แสดง 3 2 1
+          numEl.textContent = count;
+          numEl.style.animation = 'none';
+          numEl.offsetHeight;
+          numEl.style.animation = '';
+          overlay.classList.add('show');
+          count--;
+          setTimeout(showCount, 1000);
         } else {
-          window.open(liffUrl, '_blank');
+          // ซ่อนตัวเลข — ค้างภาพไว้ 2 วินาที
+          overlay.classList.remove('show');
+          document.getElementById('preview-banner').style.display = 'none';
+
+          setTimeout(() => {
+            // ซ่อนไพ่แล้วเริ่มเกม
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('flipped'));
+            isLocked = false;
+          }, 2000);
         }
       }
 
-      load();
-      // สร้าง QR Code
-      new QRCode(document.getElementById('qr-code'), {
-        text: 'https://liff.line.me/2010102212-gfhenzK0',
-        width: 160,
-        height: 160,
-        colorDark: '#000000',
-        colorLight: '#ffffff'
-      });
+      showCount();
+    }
 
-    </script>
-  </body>
+
+    function buildBoard() {
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+      cardDefs.forEach(card => {
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.dataset.id  = card.id;
+        el.dataset.uid = card.uid;
+        el.innerHTML = `
+          <div class="card-inner">
+            <div class="card-face card-back">
+              <div class="card-back-pattern"></div>
+            </div>
+            <div class="card-face card-front">
+              ${card.imageUrl
+                ? `<img src="${card.imageUrl}" alt="${card.name}" loading="lazy">`
+                : `<div class="card-emoji">${card.emoji}</div>`}
+            </div>
+          </div>`;
+        el.addEventListener('click', () => onCardClick(el, card));
+        board.appendChild(el);
+      });
+    }
+
+    function onCardClick(el, card) {
+      if (isLocked) return;
+      if (el.classList.contains('flipped') || el.classList.contains('matched')) return;
+
+      // Start timer on first tap
+      if (!gameStarted) {
+        gameStarted = true;
+        timerInterval = setInterval(() => {
+          timerMs += 100;
+          document.getElementById('timer').textContent = formatTime(timerMs);
+        }, 100);
+      }
+
+      el.classList.add('flipped');
+      flipped.push({ el, card });
+
+      if (flipped.length === 2) {
+        isLocked = true;
+        checkMatch();
+      }
+    }
+
+    function checkMatch() {
+      const [a, b] = flipped;
+      if (a.card.id === b.card.id) {
+        // Match!
+        setTimeout(() => {
+          a.el.classList.remove('flipped'); a.el.classList.add('matched');
+          b.el.classList.remove('flipped'); b.el.classList.add('matched');
+          matched.add(a.card.uid); matched.add(b.card.uid);
+          const found = matched.size / 2;
+          document.getElementById('pairs-found').textContent = found;
+          flipped = []; isLocked = false;
+          if (found === PAIRS) onWin();
+        }, 300);
+      } else {
+        // No match
+        setTimeout(() => {
+          a.el.classList.add('wrong'); b.el.classList.add('wrong');
+          setTimeout(() => {
+            a.el.classList.remove('flipped','wrong');
+            b.el.classList.remove('flipped','wrong');
+            flipped = []; isLocked = false;
+          }, 500);
+        }, 600);
+      }
+    }
+
+    // ─────────────────────────────────────────
+    // WIN
+    // ─────────────────────────────────────────
+    async function onWin() {
+      clearInterval(timerInterval);
+      const elapsed = timerMs;
+      const isNewBest = bestTime === null || elapsed < bestTime;
+
+      document.getElementById('win-time').textContent = formatTime(elapsed);
+      document.getElementById('win-trophy').textContent = isNewBest ? '🏆' : '🎉';
+      document.getElementById('win-title').textContent  = isNewBest ? 'สถิติใหม่!' : 'จับคู่ครบแล้ว!';
+
+      if (isNewBest) {
+        document.getElementById('win-best').style.display = 'block';
+        if (bestTime !== null) {
+          document.getElementById('win-prev').style.display = 'block';
+          document.getElementById('win-prev').textContent = `เดิม: ${formatTime(bestTime)}`;
+        }
+        bestTime = elapsed;
+        launchConfetti();
+      } else {
+        document.getElementById('win-prev').style.display = 'block';
+        document.getElementById('win-prev').textContent = `สถิติดีที่สุด: ${formatTime(bestTime)}`;
+      }
+
+      showScreen('win');
+
+      // Update best time in badge
+      document.getElementById('best-badge').style.display = 'block';
+      document.getElementById('best-time-disp').textContent = formatTime(bestTime);
+
+      // Save + fetch leaderboard
+      try {
+        await callAPI('saveScore', {
+          userId:      player.userId,
+          displayName: player.displayName,
+          pictureUrl:  player.pictureUrl || '',
+          timeMs:      elapsed
+        });
+      } catch(e) { console.warn('Save failed:', e); }
+
+      try {
+        const lb = await callAPI('getLeaderboard', {});
+        renderLeaderboard(lb.entries || []);
+      } catch(e) {
+        document.getElementById('lb-list').innerHTML = '<div class="lb-empty">ไม่สามารถโหลด Leaderboard ได้</div>';
+      }
+    }
+
+    function renderLeaderboard(entries) {
+      const list = document.getElementById('lb-list');
+      if (!entries.length) {
+        list.innerHTML = '<div class="lb-empty">ยังไม่มีคะแนน</div>';
+        return;
+      }
+      const rankEmoji = ['🥇','🥈','🥉'];
+      list.innerHTML = entries.slice(0,10).map((e, i) => {
+        const isMe = e.userId === player.userId;
+        const rankClass = i < 3 ? `r${i+1}` : '';
+        const avatarHtml = e.pictureUrl
+          ? `<img class="lb-avatar" src="${e.pictureUrl}" onerror="this.outerHTML='<div class=\\'lb-avatar-fb\\'>${e.displayName.slice(0,2).toUpperCase()}</div>'">`
+          : `<div class="lb-avatar-fb">${(e.displayName||'?').slice(0,2).toUpperCase()}</div>`;
+        return `<div class="lb-row${isMe?' me':''}">
+          <div class="lb-rank ${rankClass}">${i < 3 ? rankEmoji[i] : i+1}</div>
+          ${avatarHtml}
+          <div class="lb-name">${e.displayName}${isMe?' (คุณ)':''}</div>
+          <div class="lb-time">${formatTime(e.bestTime)}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function playAgain() { showIntro(); }
+
+    // ─────────────────────────────────────────
+    // UTILS
+    // ─────────────────────────────────────────
+    function formatTime(ms) {
+      const s = Math.floor(ms / 1000);
+      const m = Math.floor(s / 60);
+      const sec = s % 60;
+      const msDisp = Math.floor((ms % 1000) / 10);
+      if (m > 0) return `${m}:${String(sec).padStart(2,'0')}.${String(msDisp).padStart(2,'0')}`;
+      return `${String(sec).padStart(2,'0')}.${String(msDisp).padStart(2,'0')}`;
+    }
+
+    function launchConfetti() {
+      const colors = ['#FFD700','#0033CC','#FF4444','#00CC66','#FF8800','#FFFFFF'];
+      for (let i = 0; i < 60; i++) {
+        setTimeout(() => {
+          const p = document.createElement('div');
+          p.className = 'conf';
+          const sz = 6 + Math.random()*10;
+          p.style.cssText = `left:${Math.random()*100}vw;width:${sz}px;height:${sz}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'2px'};--d:${1.5+Math.random()*2}s;--dl:${Math.random()*.8}s;--tx:${(Math.random()-.5)*200}px;--r:${360+Math.random()*720}deg`;
+          document.body.appendChild(p);
+          setTimeout(() => p.remove(), 3500);
+        }, Math.random() * 600);
+      }
+    }
+
+    function showScreen(name) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+      document.getElementById('s-' + name).classList.remove('hidden');
+    }
+    function showError(msg) {
+      document.getElementById('err-msg').innerHTML = msg;
+      showScreen('error');
+    }
+
+    async function callAPI(action, params) {
+      const q = new URLSearchParams({ action, ...params });
+      const r = await fetch(`${CONFIG.API_URL}?${q}`, { method:'GET' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }
+  </script>
+</body>
 </html>
