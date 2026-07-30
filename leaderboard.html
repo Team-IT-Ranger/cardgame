@@ -196,12 +196,10 @@
 
 
       function playAgain() {
-        const liffUrl = 'https://liff.line.me/2010102212-gfhenzK0';
-        // ถ้าเปิดใน Line → ใช้ LIFF navigate
+        const liffUrl = 'https://liff.line.me/2010102212-gfhenzK0?autostart=true';
         if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
           liff.openWindow({ url: liffUrl, external: false });
         } else {
-          // เปิด browser ธรรมดา → เปิด tab ใหม่
           window.open(liffUrl, '_blank');
         }
       }
