@@ -270,7 +270,7 @@
   <!-- LOADING -->
   <div class="screen" id="s-loading">
     <img class="ld-icon" src="card-back.png" alt="card">
-    <div class="ld-title">Memory Card</div>
+    <div class="ld-title">Memory Challenge</div>
     <div style="font-size:.85rem;color:var(--text-muted);font-family:'Sarabun',sans-serif">Affiliate Challenge</div>
     <div class="ld-bar"><div class="ld-fill"></div></div>
   </div>
@@ -278,10 +278,9 @@
   <!-- INTRO -->
   <div class="screen hidden" id="s-intro">
     <div class="intro-title">
-      <img src="card-back.png" style="width:48px;height:48px;object-fit:contain;vertical-align:middle;margin-right:8px">
+      <img src="card-back.png" style="width:36px;height:36px;object-fit:contain;vertical-align:middle;margin-right:6px">
       Memory Challenge
     </div>
-
     <div id="avatar-wrap"></div>
     <div class="player-name" id="player-name">–</div>
 
@@ -292,32 +291,31 @@
       <div class="rule-row"><span class="rule-icon">🔁</span>เล่นซ้ำได้ไม่จำกัด</div>
     </div>
 
-    <div class="player-sub">พร้อมแล้วหรือยัง?</div>
-
     <div class="best-time-badge" id="best-badge" style="display:none">
-      🥇 เวลาดีที่สุดของคุณ: <strong id="best-time-disp">–</strong>
+      🥇 สถิติของคุณ: <strong id="best-time-disp">–</strong>
     </div>
 
-    <div id="rank-info" style="width:100%;max-width:320px;display:none">
-      <div style="background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px">
-        <div style="font-size:1.8rem">🥇</div>
+    <!-- อันดับ -->
+    <div id="rank-info" style="width:100%;max-width:320px;display:none;display:flex;flex-direction:column;gap:6px">
+      <div class="rank-box">
+        <div class="rank-box-icon">🥇</div>
         <div style="flex:1">
-          <div style="font-size:0.7rem;color:var(--text-muted);letter-spacing:1px">สถิติอันดับ 1</div>
-          <div style="font-size:1rem;font-weight:700" id="rank1-name">–</div>
+          <div class="rank-box-label">สถิติอันดับ 1</div>
+          <div class="rank-box-name" id="rank1-name">–</div>
         </div>
-        <div style="font-size:1.3rem;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums" id="rank1-time">–</div>
+        <div class="rank-box-val" id="rank1-time">–</div>
       </div>
-      <div style="background:rgba(0,51,204,0.2);border:1px solid rgba(0,51,204,0.4);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px">
-        <div style="font-size:1.8rem">🎯</div>
+      <div class="rank-box me">
+        <div class="rank-box-icon">🎯</div>
         <div style="flex:1">
-          <div style="font-size:0.7rem;color:var(--text-muted);letter-spacing:1px">อันดับของคุณ</div>
-          <div style="font-size:1rem;font-weight:700;color:white" id="my-rank-text">–</div>
+          <div class="rank-box-label">อันดับของคุณ</div>
+          <div class="rank-box-name" id="my-rank-text">–</div>
         </div>
-        <div style="font-size:1.3rem;font-weight:900;color:#00AAFF;font-variant-numeric:tabular-nums" id="my-rank-num">–</div>
+        <div class="rank-box-val" id="my-rank-num" style="color:#00AAFF">–</div>
       </div>
     </div>
 
-    <button class="start-btn" onclick="startGame()">เริ่มเล่น! 🚀</button>
+    <button class="start-btn" onclick="startGame()">🚀 เริ่มเล่น!</button>
   </div>
 
   <!-- GAME -->
