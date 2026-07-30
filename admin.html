@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Memory Card Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700;800&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#0033CC;--brand-light:#1A4FE8;--gold:#FFD700;--gold-dark:#E6B800;
+  --bg:#0A0E1A;--bg2:#111827;--bg3:#1F2937;
+  --border:rgba(255,255,255,0.08);--text:#F9FAFB;--text-muted:#9CA3AF;
+  --success:#10B981;--danger:#EF4444;--warning:#F59E0B;--info:#3B82F6;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── LOGIN ── */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(0,51,204,.2),transparent 70%),var(--bg)}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:40px;width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.login-icon{font-size:3rem;margin-bottom:12px}
+.login-title{font-size:1.6rem;font-weight:800;color:var(--gold);margin-bottom:4px}
+.login-sub{font-size:.85rem;color:var(--text-muted);margin-bottom:24px;font-family:'Sarabun',sans-serif}
+.login-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:13px;font-family:'Kanit',sans-serif;font-size:1rem;color:var(--text);outline:none;margin-bottom:10px;text-align:center;letter-spacing:3px;transition:border-color .2s}
+.login-input:focus{border-color:var(--brand-light)}
+.login-btn{width:100%;background:var(--brand);border:none;border-radius:10px;padding:13px;font-family:'Kanit',sans-serif;font-size:1rem;font-weight:700;color:white;cursor:pointer;transition:background .2s}
+.login-btn:hover{background:var(--brand-light)}
+.login-error{color:var(--danger);font-size:.85rem;margin-top:8px;display:none}
+
+/* ── DASHBOARD ── */
+#dashboard{display:none}
+.navbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.navbar-brand{font-size:1.1rem;font-weight:800;color:var(--gold);display:flex;align-items:center;gap:8px}
+.navbar-actions{display:flex;gap:8px}
+
+.btn{padding:7px 16px;border-radius:8px;font-family:'Kanit',sans-serif;font-size:.85rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--brand);color:white}.btn-primary:hover{background:var(--brand-light)}
+.btn-success{background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.3)}.btn-success:hover{background:rgba(16,185,129,.25)}
+.btn-danger{background:rgba(239,68,68,.15);color:var(--danger);border:1px solid rgba(239,68,68,.3)}.btn-danger:hover{background:rgba(239,68,68,.25)}
+.btn-warning{background:rgba(245,158,11,.15);color:var(--warning);border:1px solid rgba(245,158,11,.3)}.btn-warning:hover{background:rgba(245,158,11,.25)}
+.btn-ghost{background:transparent;color:var(--text-muted);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+.btn-sm{padding:4px 10px;font-size:.75rem;border-radius:6px}
+
+.main{padding:20px;max-width:1100px;margin:0 auto}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:4px}
+.tab{flex:1;padding:9px 4px;border:none;background:transparent;color:var(--text-muted);font-family:'Kanit',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;border-radius:8px;transition:all .2s;text-align:center}
+.tab.active{background:var(--brand);color:white}
+.tab-content{display:none}.tab-content.active{display:block}
+
+/* ── STATS CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px}
+.stat-label{font-size:.7rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.stat-value{font-size:2rem;font-weight:800;line-height:1}
+.stat-sub{font-size:.75rem;color:var(--text-muted);margin-top:3px;font-family:'Sarabun',sans-serif}
+.stat-card.gold{border-color:rgba(255,215,0,.3)}.stat-card.gold .stat-value{color:var(--gold)}
+.stat-card.green .stat-value{color:var(--success)}
+.stat-card.blue .stat-value{color:var(--info)}
+.stat-card.orange .stat-value{color:var(--warning)}
+
+/* ── PRIZE SUMMARY ── */
+.prize-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.prize-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.prize-box-val{font-size:1.8rem;font-weight:800}
+.prize-box-label{font-size:.7rem;color:var(--text-muted);margin-top:2px;font-family:'Sarabun',sans-serif}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.filter-input{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'Kanit',sans-serif;font-size:.85rem;color:var(--text);outline:none;transition:border-color .2s}
+.filter-input:focus{border-color:var(--brand-light)}
+.filter-input[type=date]{width:145px}
+.filter-input[type=text]{flex:1;min-width:160px}
+.filter-select{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:'Kanit',sans-serif;font-size:.85rem;color:var(--text);outline:none;cursor:pointer}
+
+/* ── TABLE ── */
+.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.table-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
+.table-title{font-size:.85rem;font-weight:700;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase}
+table{width:100%;border-collapse:collapse}
+thead{background:var(--bg3)}
+th{padding:10px 12px;text-align:left;font-size:.68rem;font-weight:700;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+td{padding:10px 12px;font-size:.83rem;border-top:1px solid var(--border);font-family:'Sarabun',sans-serif;vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.02)}
+.empty-state{text-align:center;padding:40px;color:var(--text-muted);font-family:'Sarabun',sans-serif}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:10px;font-size:.7rem;font-weight:700;font-family:'Kanit',sans-serif;white-space:nowrap}
+.badge-pending{background:rgba(245,158,11,.15);color:var(--warning);border:1px solid rgba(245,158,11,.3)}
+.badge-shipped{background:rgba(59,130,246,.15);color:var(--info);border:1px solid rgba(59,130,246,.3)}
+.badge-received{background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.3)}
+
+.rank-num{font-size:.85rem;font-weight:800;width:28px;text-align:center}
+.rank-1{color:var(--gold)}
+.rank-2{color:#C0C0C0}
+.rank-3{color:#CD7F32}
+
+.player-cell{display:flex;align-items:center;gap:8px}
+.player-pic{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--border)}
+.player-pic-fb{width:32px;height:32px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;flex-shrink:0}
+.player-name-cell{font-size:.85rem;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.time-val{font-family:'Courier New',monospace;font-weight:700;color:var(--gold);font-size:.85rem}
+.user-id-short{font-family:monospace;font-size:.72rem;color:var(--text-muted)}
+
+/* Prize controls inline */
+.prize-controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.prize-select{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-family:'Kanit',sans-serif;font-size:.75rem;color:var(--text);outline:none;cursor:pointer}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.active{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:28px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal-title{font-size:1.2rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.modal-body{display:flex;flex-direction:column;gap:12px}
+.modal-label{font-size:.8rem;color:var(--text-muted);margin-bottom:4px}
+.modal-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'Kanit',sans-serif;font-size:.9rem;color:var(--text);outline:none}
+.modal-input:focus{border-color:var(--brand-light)}
+.modal-select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'Kanit',sans-serif;font-size:.9rem;color:var(--text);outline:none;cursor:pointer}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:11px 22px;font-size:.9rem;font-weight:600;z-index:300;transition:transform .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.4);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:rgba(16,185,129,.4);color:var(--success)}
+.toast.error{border-color:rgba(239,68,68,.4);color:var(--danger)}
+
+.spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--brand);border-radius:50%;animation:spin .8s linear infinite;margin:32px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-icon">🃏</div>
+    <div class="login-title">Admin Panel</div>
+    <div class="login-sub">Memory Card Game — ระบบหลังบ้าน</div>
+    <input class="login-input" type="password" id="pw-input" placeholder="รหัสผ่าน"
+      onkeydown="if(event.key==='Enter')login()">
+    <button class="login-btn" onclick="login()">เข้าสู่ระบบ</button>
+    <div class="login-error" id="login-error">รหัสผ่านไม่ถูกต้อง</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <nav class="navbar">
+    <div class="navbar-brand">🃏 Memory Card Admin</div>
+    <div class="navbar-actions">
+      <button class="btn btn-ghost" onclick="loadData()">🔄</button>
+      <button class="btn btn-success" onclick="exportCSV()">📥 CSV</button>
+      <button class="btn btn-ghost" onclick="logout()">ออก</button>
+    </div>
+  </nav>
+
+  <div class="main">
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('overview')">📊 ภาพรวม</button>
+      <button class="tab" onclick="switchTab('players')">👥 ผู้เล่น & รางวัล</button>
+      <button class="tab" onclick="switchTab('leaderboard')">🏆 Leaderboard</button>
+    </div>
+
+    <!-- TAB: OVERVIEW -->
+    <div class="tab-content active" id="tab-overview">
+
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card"><div class="spinner"></div></div>
+      </div>
+
+      <div style="font-size:.8rem;font-weight:700;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">📦 สถานะรางวัล</div>
+      <div class="prize-summary" id="prize-summary">
+        <div class="prize-box"><div class="prize-box-val" style="color:var(--warning)">–</div><div class="prize-box-label">⏳ รอดำเนินการ</div></div>
+        <div class="prize-box"><div class="prize-box-val" style="color:var(--info)">–</div><div class="prize-box-label">🚚 จัดส่งแล้ว</div></div>
+        <div class="prize-box"><div class="prize-box-val" style="color:var(--success)">–</div><div class="prize-box-label">✅ รับแล้ว</div></div>
+      </div>
+
+      <!-- Best player -->
+      <div class="table-wrap">
+        <div class="table-header"><div class="table-title">🥇 สถิติดีที่สุด</div></div>
+        <div id="best-player-wrap" style="padding:16px;text-align:center;color:var(--text-muted);font-family:'Sarabun',sans-serif">กำลังโหลด...</div>
+      </div>
+
+    </div>
+
+    <!-- TAB: PLAYERS & PRIZES -->
+    <div class="tab-content" id="tab-players">
+
+      <!-- Filter -->
+      <div class="filter-bar">
+        <input class="filter-input" type="text" id="search-input" placeholder="🔍 ค้นหาชื่อ..." oninput="filterPlayers()">
+        <input class="filter-input" type="date" id="date-from" onchange="filterPlayers()">
+        <span style="color:var(--text-muted);font-size:.85rem">ถึง</span>
+        <input class="filter-input" type="date" id="date-to" onchange="filterPlayers()">
+        <select class="filter-select" id="status-filter" onchange="filterPlayers()">
+          <option value="">ทุกสถานะ</option>
+          <option value="pending">⏳ รอดำเนินการ</option>
+          <option value="shipped">🚚 จัดส่งแล้ว</option>
+          <option value="received">✅ รับแล้ว</option>
+        </select>
+        <button class="btn btn-ghost" onclick="clearFilters()">✕ ล้าง</button>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">👥 รายชื่อผู้เล่น</div>
+          <div id="player-count" style="font-size:.8rem;color:var(--text-muted)"></div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>อันดับ</th>
+              <th>ผู้เล่น</th>
+              <th>เวลาดีสุด</th>
+              <th>ครั้ง</th>
+              <th>เล่นล่าสุด</th>
+              <th>รางวัล</th>
+              <th>สถานะ</th>
+              <th>จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="players-tbody">
+            <tr><td colspan="8" class="empty-state">กำลังโหลด...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB: LEADERBOARD -->
+    <div class="tab-content" id="tab-leaderboard">
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">🏆 Leaderboard — Top 20</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadData()">🔄 รีเฟรช</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>อันดับ</th>
+              <th>ผู้เล่น</th>
+              <th>เวลาดีที่สุด</th>
+              <th>จำนวนครั้ง</th>
+              <th>เล่นล่าสุด</th>
+            </tr>
+          </thead>
+          <tbody id="lb-tbody">
+            <tr><td colspan="5" class="empty-state">กำลังโหลด...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: แก้ไขรางวัล -->
+<div class="modal-overlay" id="prize-modal">
+  <div class="modal">
+    <div class="modal-title">🎁 จัดการรางวัล</div>
+    <div class="modal-body">
+      <div>
+        <div class="modal-label">ชื่อผู้เล่น</div>
+        <div id="modal-player-name" style="font-weight:700;font-size:1rem"></div>
+      </div>
+      <div>
+        <div class="modal-label">รางวัลที่ได้รับ</div>
+        <input class="modal-input" id="modal-prize-type" placeholder="เช่น เสื้อยืด, คูปอง 100 บาท">
+      </div>
+      <div>
+        <div class="modal-label">สถานะ</div>
+        <select class="modal-select" id="modal-prize-status">
+          <option value="pending">⏳ รอดำเนินการ</option>
+          <option value="shipped">🚚 จัดส่งแล้ว</option>
+          <option value="received">✅ รับแล้ว</option>
+        </select>
+      </div>
+      <div>
+        <div class="modal-label">หมายเหตุ</div>
+        <input class="modal-input" id="modal-notes" placeholder="เช่น ที่อยู่, เลข tracking...">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="savePrize()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────
+const API_URL = 'https://script.google.com/macros/s/AKfycbzOzuWgbakgVyPfE0jFm0LCXgrz-aCMwi0ti1YpaoDVXJNX6uUblm0Y4AxML25ghFeI/exec'; // ← ใส่ URL เดียวกับเกม
+let PW = '';
+let allPlayers = [];
+let editingUserId = '';
+
+// ─────────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────────
+function login() {
+  PW = document.getElementById('pw-input').value.trim();
+  if (!PW) return;
+  document.getElementById('login-error').style.display = 'none';
+  loadData();
+}
+
+function logout() {
+  PW = '';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pw-input').value = '';
+}
+
+// ─────────────────────────────────────────
+// LOAD DATA
+// ─────────────────────────────────────────
+async function loadData() {
+  try {
+    const [statsRes, playersRes, lbRes] = await Promise.all([
+      api('adminStats'),
+      api('getPlayers'),
+      api('getLeaderboard')
+    ]);
+
+    if (!statsRes.success) {
+      document.getElementById('login-error').style.display = 'block';
+      return;
+    }
+
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+
+    renderStats(statsRes);
+    allPlayers = playersRes.players || [];
+    filterPlayers();
+    renderLeaderboard(lbRes.entries || []);
+
+  } catch(e) {
+    showToast('❌ ' + e.message, 'error');
+  }
+}
+
+// ─────────────────────────────────────────
+// STATS
+// ─────────────────────────────────────────
+function renderStats(d) {
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card gold">
+      <div class="stat-label">👥 ผู้เล่นทั้งหมด</div>
+      <div class="stat-value">${d.totalPlayers}</div>
+      <div class="stat-sub">คนที่เล่นแล้ว</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">📅 วันนี้</div>
+      <div class="stat-value">${d.todayPlayers}</div>
+      <div class="stat-sub">คนที่เล่นวันนี้</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">📆 7 วันล่าสุด</div>
+      <div class="stat-value">${d.weekPlayers}</div>
+      <div class="stat-sub">คนที่เล่นสัปดาห์นี้</div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-label">🎮 เล่นทั้งหมด</div>
+      <div class="stat-value">${d.totalPlays}</div>
+      <div class="stat-sub">รวมทุกครั้ง</div>
+    </div>
+  `;
+
+  // Prize summary
+  const boxes = document.getElementById('prize-summary').querySelectorAll('.prize-box-val');
+  boxes[0].textContent = d.pendingPrizes;
+  boxes[1].textContent = d.shippedPrizes;
+  boxes[2].textContent = d.receivedPrizes;
+
+  // Best player
+  const bestWrap = document.getElementById('best-player-wrap');
+  if (d.bestPlayer) {
+    bestWrap.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:8px">
+        <div style="font-size:2.5rem">🥇</div>
+        <div style="text-align:left">
+          <div style="font-size:1.1rem;font-weight:700;color:white">${d.bestPlayer.name}</div>
+          <div style="font-size:1.8rem;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums">${formatTime(d.bestPlayer.time)}</div>
+        </div>
+      </div>`;
+  } else {
+    bestWrap.textContent = 'ยังไม่มีข้อมูล';
+  }
+}
+
+// ─────────────────────────────────────────
+// PLAYERS TABLE
+// ─────────────────────────────────────────
+function filterPlayers() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const from   = document.getElementById('date-from').value;
+  const to     = document.getElementById('date-to').value;
+  const status = document.getElementById('status-filter').value;
+
+  let filtered = allPlayers.filter(p => {
+    const matchName = !search || p.displayName.toLowerCase().includes(search);
+    const matchFrom = !from   || new Date(p.lastPlayed) >= new Date(from);
+    const matchTo   = !to     || new Date(p.lastPlayed) <= new Date(to + 'T23:59:59');
+    const matchStat = !status || (p.prizeStatus || 'pending') === status;
+    return matchName && matchFrom && matchTo && matchStat;
+  });
+
+  document.getElementById('player-count').textContent = `${filtered.length} รายการ`;
+  renderPlayersTable(filtered);
+}
+
+function clearFilters() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('date-from').value = '';
+  document.getElementById('date-to').value = '';
+  document.getElementById('status-filter').value = '';
+  filterPlayers();
+}
+
+function renderPlayersTable(players) {
+  const tbody = document.getElementById('players-tbody');
+  if (!players.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">ไม่พบรายการ</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = players.map((p, i) => {
+    const rank       = allPlayers.indexOf(p) + 1;
+    const rankClass  = rank===1?'rank-1':rank===2?'rank-2':rank===3?'rank-3':'';
+    const statusBadge = getStatusBadge(p.prizeStatus);
+    const avatar     = avatarHtml(p, 32);
+
+    return `<tr>
+      <td><div class="rank-num ${rankClass}">${rank <= 3 ? ['🥇','🥈','🥉'][rank-1] : rank}</div></td>
+      <td>
+        <div class="player-cell">
+          ${avatar}
+          <div>
+            <div class="player-name-cell">${p.displayName}</div>
+            <div class="user-id-short">...${p.userId.slice(-6)}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="time-val">${formatTime(p.bestTimeMs)}</span></td>
+      <td style="color:var(--text-muted)">${p.playCount}</td>
+      <td style="color:var(--text-muted);font-size:.75rem">${formatDate(p.lastPlayed)}</td>
+      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${p.prizeType?'white':'var(--text-muted)'}">
+        ${p.prizeType || '–'}
+      </td>
+      <td>${statusBadge}</td>
+      <td>
+        <button class="btn btn-warning btn-sm" onclick="openPrizeModal('${p.userId}','${p.displayName}','${p.prizeType||''}','${p.prizeStatus||'pending'}','${p.notes||''}')">
+          ✏️ แก้ไข
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function getStatusBadge(status) {
+  switch(status) {
+    case 'shipped':  return '<span class="badge badge-shipped">🚚 จัดส่งแล้ว</span>';
+    case 'received': return '<span class="badge badge-received">✅ รับแล้ว</span>';
+    default:         return '<span class="badge badge-pending">⏳ รอดำเนินการ</span>';
+  }
+}
+
+// ─────────────────────────────────────────
+// LEADERBOARD
+// ─────────────────────────────────────────
+function renderLeaderboard(entries) {
+  const tbody = document.getElementById('lb-tbody');
+  if (!entries.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">ยังไม่มีคะแนน</td></tr>';
+    return;
+  }
+  const medals = ['🥇','🥈','🥉'];
+  tbody.innerHTML = entries.map((e, i) => `
+    <tr>
+      <td><div class="rank-num ${i<3?`rank-${i+1}`:''}">
+        ${i < 3 ? medals[i] : i+1}
+      </div></td>
+      <td>
+        <div class="player-cell">
+          ${avatarHtml(e, 32)}
+          <div class="player-name-cell">${e.displayName}</div>
+        </div>
+      </td>
+      <td><span class="time-val">${formatTime(e.bestTime)}</span></td>
+      <td style="color:var(--text-muted)">${e.playCount}</td>
+      <td style="color:var(--text-muted);font-size:.75rem">${formatDate(e.lastPlayed)}</td>
+    </tr>`).join('');
+}
+
+// ─────────────────────────────────────────
+// PRIZE MODAL
+// ─────────────────────────────────────────
+function openPrizeModal(userId, name, prizeType, prizeStatus, notes) {
+  editingUserId = userId;
+  document.getElementById('modal-player-name').textContent = name;
+  document.getElementById('modal-prize-type').value   = prizeType;
+  document.getElementById('modal-prize-status').value = prizeStatus;
+  document.getElementById('modal-notes').value        = notes;
+  document.getElementById('prize-modal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('prize-modal').classList.remove('active');
+}
+
+async function savePrize() {
+  const prizeType   = document.getElementById('modal-prize-type').value;
+  const prizeStatus = document.getElementById('modal-prize-status').value;
+  const notes       = document.getElementById('modal-notes').value;
+  try {
+    const r = await api('updatePrize', { userId:editingUserId, prizeType, prizeStatus, notes });
+    if (r.success) {
+      showToast('✅ บันทึกแล้ว', 'success');
+      closeModal();
+      loadData();
+    } else {
+      showToast('❌ ' + r.message, 'error');
+    }
+  } catch(e) { showToast('❌ ' + e.message, 'error'); }
+}
+
+// ─────────────────────────────────────────
+// EXPORT CSV
+// ─────────────────────────────────────────
+async function exportCSV() {
+  try {
+    const r = await api('exportCSV');
+    if (!r.success) { showToast('❌ ' + r.message, 'error'); return; }
+    const blob = new Blob(['\ufeff' + r.csv], { type:'text/csv;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `memory-game-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✅ Export สำเร็จ', 'success');
+  } catch(e) { showToast('❌ ' + e.message, 'error'); }
+}
+
+// ─────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active', ['overview','players','leaderboard'][i]===name);
+  });
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+async function api(action, extra={}) {
+  const q = new URLSearchParams({ action, pw:PW, ...extra });
+  const r = await fetch(`${API_URL}?${q}`);
+  return r.json();
+}
+
+function avatarHtml(p, size) {
+  const name = p.displayName || p.name || '?';
+  const url  = p.pictureUrl  || p.picture || '';
+  const init = name.slice(0,2).toUpperCase();
+  if (url) return `<img class="player-pic" src="${url}" style="width:${size}px;height:${size}px" onerror="this.outerHTML='<div class=\\'player-pic-fb\\'style=\\'width:${size}px;height:${size}px\\'>${init}</div>'">`;
+  return `<div class="player-pic-fb" style="width:${size}px;height:${size}px">${init}</div>`;
+}
+
+function formatTime(ms) {
+  if (!ms) return '–';
+  const s = Math.floor(ms/1000), m = Math.floor(s/60), sc = s%60, ms2 = Math.floor((ms%1000)/10);
+  if (m>0) return `${m}:${String(sc).padStart(2,'0')}.${String(ms2).padStart(2,'0')}`;
+  return `${String(sc).padStart(2,'0')}.${String(ms2).padStart(2,'0')}`;
+}
+
+function formatDate(d) {
+  if (!d) return '–';
+  try { return new Date(d).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}); }
+  catch { return d; }
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Close modal on overlay click
+document.getElementById('prize-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
