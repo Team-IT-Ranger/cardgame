@@ -83,10 +83,24 @@
       <div id="lb-wrap" class="lb-list"></div>
 
       <div class="footer">
+
+        <button onclick="playAgain()" style="
+          width:100%;max-width:320px;height:56px;
+          background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+          border:none;border-radius:28px;
+          font-family:'Kanit',sans-serif;font-size:1.2rem;font-weight:800;
+          color:#001F80;cursor:pointer;
+          box-shadow:0 6px 24px rgba(255,215,0,.35);
+          display:block;margin:0 auto 24px;
+          transition:transform .15s">
+          🎮 เล่นอีกครั้ง
+        </button>
+
         <div class="footer-qr-label">สแกนเพื่อเล่น</div>
         <div id="qr-code" style="background:white;padding:12px;border-radius:12px;display:inline-block;margin:8px auto"></div>
         <div class="footer-url">https://liff.line.me/2010102212-gfhenzK0</div>
         <div class="refresh-note">หน้านี้จะอัปเดตอัตโนมัติทุก 30 วินาที</div>
+
       </div>
 
     </div>
@@ -177,6 +191,18 @@
           document.getElementById('lb-wrap').innerHTML =
             `<div class="center-msg">โหลดไม่ได้: ${e.message}</div>`;
           console.error(e);
+        }
+      }
+
+
+      function playAgain() {
+        const liffUrl = 'https://liff.line.me/2010102212-gfhenzK0';
+        // ถ้าเปิดใน Line → ใช้ LIFF navigate
+        if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
+          liff.openWindow({ url: liffUrl, external: false });
+        } else {
+          // เปิด browser ธรรมดา → เปิด tab ใหม่
+          window.open(liffUrl, '_blank');
         }
       }
 

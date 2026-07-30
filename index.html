@@ -52,6 +52,32 @@
   .rule-row{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:.88rem;color:rgba(255,255,255,.8);font-family:'Sarabun',sans-serif}
   .rule-icon{font-size:1.1rem;flex-shrink:0}
   .best-time-badge{background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.3);border-radius:8px;padding:8px 16px;font-size:.85rem;color:var(--gold)}
+
+  <!-- อันดับ 1 และอันดับของผู้เล่น -->
+  <div id="rank-info" style="width:100%;max-width:320px;display:none">
+    
+    <!-- อันดับ 1 -->
+    <div style="background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <div style="font-size:1.8rem">🥇</div>
+      <div style="flex:1">
+        <div style="font-size:0.7rem;color:var(--text-muted);letter-spacing:1px">สถิติอันดับ 1</div>
+        <div style="font-size:1rem;font-weight:700" id="rank1-name">–</div>
+      </div>
+      <div style="font-size:1.3rem;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums" id="rank1-time">–</div>
+    </div>
+
+    <!-- อันดับปัจจุบันของผู้เล่น -->
+    <div style="background:rgba(0,51,204,0.2);border:1px solid rgba(0,51,204,0.4);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px">
+      <div style="font-size:1.8rem">🎯</div>
+      <div style="flex:1">
+        <div style="font-size:0.7rem;color:var(--text-muted);letter-spacing:1px">อันดับของคุณ</div>
+        <div style="font-size:1rem;font-weight:700;color:white" id="my-rank-text">–</div>
+      </div>
+      <div style="font-size:1.3rem;font-weight:900;color:#00AAFF;font-variant-numeric:tabular-nums" id="my-rank-num">–</div>
+    </div>
+
+  </div>
+
   .start-btn{width:100%;max-width:280px;height:56px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border:none;border-radius:28px;font-family:'Kanit',sans-serif;font-size:1.2rem;font-weight:800;color:var(--brand-dark);cursor:pointer;box-shadow:0 6px 24px rgba(255,215,0,.35);transition:transform .15s,box-shadow .15s;position:relative;overflow:hidden}
   .start-btn::before{content:'';position:absolute;top:-50%;left:-100%;width:60%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:shimmer 2.5s ease-in-out infinite}
   @keyframes shimmer{0%{left:-100%}60%,100%{left:160%}}
@@ -310,6 +336,20 @@
       <div class="lb-list" id="lb-list"><div class="lb-empty">กำลังโหลด...</div></div>
 
       <button class="play-again-btn" onclick="playAgain()">🔄 เล่นอีกครั้ง</button>
+
+      <button onclick="window.open('leaderboard.html','_blank')" 
+        style="width:100%;height:52px;
+        background:transparent;
+        border:2px solid var(--gold);
+        border-radius:26px;
+        font-family:'Kanit',sans-serif;
+        font-size:1.1rem;font-weight:700;
+        color:var(--gold);cursor:pointer;
+        transition:all .2s;
+        animation:fadein .5s ease .7s both">
+        🏆 ดู Leaderboard
+      </button>
+
     </div>
   </div>
 
@@ -408,7 +448,7 @@
   // ─────────────────────────────────────────
   // INTRO
   // ─────────────────────────────────────────
-  function showIntro() {
+  async function showIntro() {
     setAvatarEl('avatar-wrap', player.pictureUrl, player.displayName, 72);
     setAvatarEl('gh-avatar-wrap', player.pictureUrl, player.displayName, 32);
     document.getElementById('player-name').textContent = player.displayName;
@@ -418,8 +458,38 @@
       document.getElementById('best-badge').style.display = 'block';
       document.getElementById('best-time-disp').textContent = formatTime(bestTime);
     }
+
     showScreen('intro');
+
+    // ดึง leaderboard เพื่อแสดงอันดับ
+    try {
+      const lb = await callAPI('getLeaderboard', {});
+      const entries = lb.entries || [];
+
+      if (entries.length > 0) {
+        // อันดับ 1
+        const top = entries[0];
+        document.getElementById('rank1-name').textContent = top.displayName;
+        document.getElementById('rank1-time').textContent = formatTime(top.bestTime);
+
+        // อันดับของผู้เล่น
+        const myRank = entries.findIndex(e => e.userId === player.userId) + 1;
+        if (myRank > 0) {
+          document.getElementById('my-rank-num').textContent = `#${myRank}`;
+          document.getElementById('my-rank-text').textContent =
+            myRank === 1 ? 'คุณคือแชมป์! 🏆' :
+            myRank <= 3  ? `Top 3 เยี่ยมมาก! 🎉` :
+                          `จาก ${entries.length} คน`;
+        } else {
+          document.getElementById('my-rank-num').textContent = '–';
+          document.getElementById('my-rank-text').textContent = 'ยังไม่มีสถิติ เริ่มเลย!';
+        }
+
+        document.getElementById('rank-info').style.display = 'block';
+      }
+    } catch(e) { /* ไม่แสดงถ้าโหลดไม่ได้ */ }
   }
+
 
   function setAvatarEl(containerId, pictureUrl, name, size) {
     const wrap = document.getElementById(containerId);
