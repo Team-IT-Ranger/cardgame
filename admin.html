@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — Memory Card Game</title>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700;800&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root{
   --brand:#0033CC;--brand-light:#1A4FE8;--gold:#FFD700;--gold-dark:#E6B800;
@@ -44,7 +45,7 @@ body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--text);min-h
 .main{padding:20px;max-width:1100px;margin:0 auto}
 
 /* ── TABS ── */
-.tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:4px}
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:4px; <button class="tab" onclick="switchTab('groups')">🏷️ กลุ่ม</button>}
 .tab{flex:1;padding:9px 4px;border:none;background:transparent;color:var(--text-muted);font-family:'Kanit',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;border-radius:8px;transition:all .2s;text-align:center}
 .tab.active{background:var(--brand);color:white}
 .tab-content{display:none}.tab-content.active{display:block}
@@ -136,7 +137,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <div class="login-card">
     <div class="login-icon">🃏</div>
     <div class="login-title">Admin Panel</div>
-    <div class="login-sub">Memory Card Game — ระบบหลังบ้าน</div>
+    <div class="login-sub">Memory Challenge — ระบบหลังบ้าน</div>
     <input class="login-input" type="password" id="pw-input" placeholder="รหัสผ่าน"
       onkeydown="if(event.key==='Enter')login()">
     <button class="login-btn" onclick="login()">เข้าสู่ระบบ</button>
@@ -253,6 +254,51 @@ tr:hover td{background:rgba(255,255,255,.02)}
       </div>
     </div>
 
+    <!-- TAB: GROUPS -->
+    <div class="tab-content" id="tab-groups">
+
+      <!-- สร้างกลุ่มใหม่ -->
+      <div class="table-wrap" style="margin-bottom:16px">
+        <div class="table-header"><div class="table-title">➕ สร้างกลุ่มใหม่</div></div>
+        <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:4px">ชื่อกลุ่ม *</div>
+            <input class="filter-input" id="g-name" placeholder="เช่น ทีม A, รอบเช้า" style="width:100%">
+          </div>
+          <div>
+            <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:4px">รอบที่</div>
+            <input class="filter-input" id="g-round" placeholder="เช่น รอบที่ 1" style="width:100%">
+          </div>
+          <div>
+            <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:4px">วันที่</div>
+            <input class="filter-input" type="date" id="g-date" style="width:100%">
+          </div>
+          <div>
+            <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:4px">รายละเอียด</div>
+            <input class="filter-input" id="g-desc" placeholder="หมายเหตุเพิ่มเติม" style="width:100%">
+          </div>
+        </div>
+        <div style="padding:0 16px 16px">
+          <button class="btn btn-primary" onclick="createGroup()" style="width:100%">
+            ✨ สร้างกลุ่ม
+          </button>
+        </div>
+      </div>
+
+      <!-- รายการกลุ่ม -->
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">📋 กลุ่มทั้งหมด</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadGroups()">🔄 รีเฟรช</button>
+        </div>
+        <div id="groups-list" style="padding:8px">
+          <div class="empty-state">กำลังโหลด...</div>
+        </div>
+      </div>
+
+    </div>  
+  
+  
   </div>
 </div>
 
@@ -349,256 +395,381 @@ async function loadData() {
 
 // ─────────────────────────────────────────
 // STATS
-// ─────────────────────────────────────────
-function renderStats(d) {
-  document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-card gold">
-      <div class="stat-label">👥 ผู้เล่นทั้งหมด</div>
-      <div class="stat-value">${d.totalPlayers}</div>
-      <div class="stat-sub">คนที่เล่นแล้ว</div>
-    </div>
-    <div class="stat-card green">
-      <div class="stat-label">📅 วันนี้</div>
-      <div class="stat-value">${d.todayPlayers}</div>
-      <div class="stat-sub">คนที่เล่นวันนี้</div>
-    </div>
-    <div class="stat-card blue">
-      <div class="stat-label">📆 7 วันล่าสุด</div>
-      <div class="stat-value">${d.weekPlayers}</div>
-      <div class="stat-sub">คนที่เล่นสัปดาห์นี้</div>
-    </div>
-    <div class="stat-card orange">
-      <div class="stat-label">🎮 เล่นทั้งหมด</div>
-      <div class="stat-value">${d.totalPlays}</div>
-      <div class="stat-sub">รวมทุกครั้ง</div>
-    </div>
-  `;
+  // ─────────────────────────────────────────
+  function renderStats(d) {
+    document.getElementById('stats-grid').innerHTML = `
+      <div class="stat-card gold">
+        <div class="stat-label">👥 ผู้เล่นทั้งหมด</div>
+        <div class="stat-value">${d.totalPlayers}</div>
+        <div class="stat-sub">คนที่เล่นแล้ว</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">📅 วันนี้</div>
+        <div class="stat-value">${d.todayPlayers}</div>
+        <div class="stat-sub">คนที่เล่นวันนี้</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">📆 7 วันล่าสุด</div>
+        <div class="stat-value">${d.weekPlayers}</div>
+        <div class="stat-sub">คนที่เล่นสัปดาห์นี้</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-label">🎮 เล่นทั้งหมด</div>
+        <div class="stat-value">${d.totalPlays}</div>
+        <div class="stat-sub">รวมทุกครั้ง</div>
+      </div>
+    `;
 
-  // Prize summary
-  const boxes = document.getElementById('prize-summary').querySelectorAll('.prize-box-val');
-  boxes[0].textContent = d.pendingPrizes;
-  boxes[1].textContent = d.shippedPrizes;
-  boxes[2].textContent = d.receivedPrizes;
+    // Prize summary
+    const boxes = document.getElementById('prize-summary').querySelectorAll('.prize-box-val');
+    boxes[0].textContent = d.pendingPrizes;
+    boxes[1].textContent = d.shippedPrizes;
+    boxes[2].textContent = d.receivedPrizes;
 
-  // Best player
-  const bestWrap = document.getElementById('best-player-wrap');
-  if (d.bestPlayer) {
-    bestWrap.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:8px">
-        <div style="font-size:2.5rem">🥇</div>
-        <div style="text-align:left">
-          <div style="font-size:1.1rem;font-weight:700;color:white">${d.bestPlayer.name}</div>
-          <div style="font-size:1.8rem;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums">${formatTime(d.bestPlayer.time)}</div>
+    // Best player
+    const bestWrap = document.getElementById('best-player-wrap');
+    if (d.bestPlayer) {
+      bestWrap.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:8px">
+          <div style="font-size:2.5rem">🥇</div>
+          <div style="text-align:left">
+            <div style="font-size:1.1rem;font-weight:700;color:white">${d.bestPlayer.name}</div>
+            <div style="font-size:1.8rem;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums">${formatTime(d.bestPlayer.time)}</div>
+          </div>
+        </div>`;
+    } else {
+      bestWrap.textContent = 'ยังไม่มีข้อมูล';
+    }
+  }
+
+  // ─────────────────────────────────────────
+  // PLAYERS TABLE
+  // ─────────────────────────────────────────
+  function filterPlayers() {
+    const search = document.getElementById('search-input').value.toLowerCase();
+    const from   = document.getElementById('date-from').value;
+    const to     = document.getElementById('date-to').value;
+    const status = document.getElementById('status-filter').value;
+
+    let filtered = allPlayers.filter(p => {
+      const matchName = !search || p.displayName.toLowerCase().includes(search);
+      const matchFrom = !from   || new Date(p.lastPlayed) >= new Date(from);
+      const matchTo   = !to     || new Date(p.lastPlayed) <= new Date(to + 'T23:59:59');
+      const matchStat = !status || (p.prizeStatus || 'pending') === status;
+      return matchName && matchFrom && matchTo && matchStat;
+    });
+
+    document.getElementById('player-count').textContent = `${filtered.length} รายการ`;
+    renderPlayersTable(filtered);
+  }
+
+  function clearFilters() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('date-from').value = '';
+    document.getElementById('date-to').value = '';
+    document.getElementById('status-filter').value = '';
+    filterPlayers();
+  }
+
+  function renderPlayersTable(players) {
+    const tbody = document.getElementById('players-tbody');
+    if (!players.length) {
+      tbody.innerHTML = '<tr><td colspan="8" class="empty-state">ไม่พบรายการ</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = players.map((p, i) => {
+      const rank       = allPlayers.indexOf(p) + 1;
+      const rankClass  = rank===1?'rank-1':rank===2?'rank-2':rank===3?'rank-3':'';
+      const statusBadge = getStatusBadge(p.prizeStatus);
+      const avatar     = avatarHtml(p, 32);
+
+      return `<tr>
+        <td><div class="rank-num ${rankClass}">${rank <= 3 ? ['🥇','🥈','🥉'][rank-1] : rank}</div></td>
+        <td>
+          <div class="player-cell">
+            ${avatar}
+            <div>
+              <div class="player-name-cell">${p.displayName}</div>
+              <div class="user-id-short">...${p.userId.slice(-6)}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="time-val">${formatTime(p.bestTimeMs)}</span></td>
+        <td style="color:var(--text-muted)">${p.playCount}</td>
+        <td style="color:var(--text-muted);font-size:.75rem">${formatDate(p.lastPlayed)}</td>
+        <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${p.prizeType?'white':'var(--text-muted)'}">
+          ${p.prizeType || '–'}
+        </td>
+        <td>${statusBadge}</td>
+        <td>
+          <button class="btn btn-warning btn-sm" onclick="openPrizeModal('${p.userId}','${p.displayName}','${p.prizeType||''}','${p.prizeStatus||'pending'}','${p.notes||''}')">
+            ✏️ แก้ไข
+          </button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function getStatusBadge(status) {
+    switch(status) {
+      case 'shipped':  return '<span class="badge badge-shipped">🚚 จัดส่งแล้ว</span>';
+      case 'received': return '<span class="badge badge-received">✅ รับแล้ว</span>';
+      default:         return '<span class="badge badge-pending">⏳ รอดำเนินการ</span>';
+    }
+  }
+
+  // ─────────────────────────────────────────
+  // LEADERBOARD
+  // ─────────────────────────────────────────
+  function renderLeaderboard(entries) {
+    const tbody = document.getElementById('lb-tbody');
+    if (!entries.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-state">ยังไม่มีคะแนน</td></tr>';
+      return;
+    }
+    const medals = ['🥇','🥈','🥉'];
+    tbody.innerHTML = entries.map((e, i) => `
+      <tr>
+        <td><div class="rank-num ${i<3?`rank-${i+1}`:''}">
+          ${i < 3 ? medals[i] : i+1}
+        </div></td>
+        <td>
+          <div class="player-cell">
+            ${avatarHtml(e, 32)}
+            <div class="player-name-cell">${e.displayName}</div>
+          </div>
+        </td>
+        <td><span class="time-val">${formatTime(e.bestTime)}</span></td>
+        <td style="color:var(--text-muted)">${e.playCount}</td>
+        <td style="color:var(--text-muted);font-size:.75rem">${formatDate(e.lastPlayed)}</td>
+      </tr>`).join('');
+  }
+
+  // ─────────────────────────────────────────
+  // PRIZE MODAL
+  // ─────────────────────────────────────────
+  function openPrizeModal(userId, name, prizeType, prizeStatus, notes) {
+    editingUserId = userId;
+    document.getElementById('modal-player-name').textContent = name;
+    document.getElementById('modal-prize-type').value   = prizeType;
+    document.getElementById('modal-prize-status').value = prizeStatus;
+    document.getElementById('modal-notes').value        = notes;
+    document.getElementById('prize-modal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('prize-modal').classList.remove('active');
+  }
+
+  async function savePrize() {
+    const prizeType   = document.getElementById('modal-prize-type').value;
+    const prizeStatus = document.getElementById('modal-prize-status').value;
+    const notes       = document.getElementById('modal-notes').value;
+    try {
+      const r = await api('updatePrize', { userId:editingUserId, prizeType, prizeStatus, notes });
+      if (r.success) {
+        showToast('✅ บันทึกแล้ว', 'success');
+        closeModal();
+        loadData();
+      } else {
+        showToast('❌ ' + r.message, 'error');
+      }
+    } catch(e) { showToast('❌ ' + e.message, 'error'); }
+  }
+
+  // ─────────────────────────────────────────
+  // EXPORT CSV
+  // ─────────────────────────────────────────
+  async function exportCSV() {
+    try {
+      const r = await api('exportCSV');
+      if (!r.success) { showToast('❌ ' + r.message, 'error'); return; }
+      const blob = new Blob(['\ufeff' + r.csv], { type:'text/csv;charset=utf-8' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `memory-game-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('✅ Export สำเร็จ', 'success');
+    } catch(e) { showToast('❌ ' + e.message, 'error'); }
+  }
+
+  // ─────────────────────────────────────────
+  // UTILS
+  // ─────────────────────────────────────────
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach((t,i)=>{
+      t.classList.toggle('active', ['overview','players','leaderboard','groups'][i]===name);
+    });
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    document.getElementById('tab-'+name).classList.add('active');
+    if (name === 'groups') loadGroups();
+  }
+
+  async function api(action, extra={}) {
+    const q = new URLSearchParams({ action, pw:PW, ...extra });
+    const r = await fetch(`${API_URL}?${q}`);
+    return r.json();
+  }
+
+  function avatarHtml(p, size) {
+    const name = p.displayName || p.name || '?';
+    const url  = p.pictureUrl  || p.picture || '';
+    const init = name.slice(0,2).toUpperCase();
+    if (url) return `<img class="player-pic" src="${url}" style="width:${size}px;height:${size}px" onerror="this.outerHTML='<div class=\\'player-pic-fb\\'style=\\'width:${size}px;height:${size}px\\'>${init}</div>'">`;
+    return `<div class="player-pic-fb" style="width:${size}px;height:${size}px">${init}</div>`;
+  }
+
+  function formatTime(ms) {
+    if (!ms) return '–';
+    const s = Math.floor(ms/1000), m = Math.floor(s/60), sc = s%60, ms2 = Math.floor((ms%1000)/10);
+    if (m>0) return `${m}:${String(sc).padStart(2,'0')}.${String(ms2).padStart(2,'0')}`;
+    return `${String(sc).padStart(2,'0')}.${String(ms2).padStart(2,'0')}`;
+  }
+
+  function formatDate(d) {
+    if (!d) return '–';
+    try { return new Date(d).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}); }
+    catch { return d; }
+  }
+
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+
+  // ─────────────────────────────────────────
+  // GROUP MANAGEMENT
+  // ─────────────────────────────────────────
+  const LIFF_URL     = 'https://liff.line.me/2010102212-gfhenzK0'; // ← ใส่ LIFF ID จริง
+  const LB_BASE_URL  = 'https://[username].github.io/memory-game/leaderboard.html'; // ← ใส่ URL จริง
+
+  async function loadGroups() {
+    try {
+      const r = await api('getGroups');
+      renderGroups(r.groups || []);
+    } catch(e) {
+      showToast('❌ ' + e.message, 'error');
+    }
+  }
+
+  function renderGroups(groups) {
+    const wrap = document.getElementById('groups-list');
+    if (!groups.length) {
+      wrap.innerHTML = '<div class="empty-state">ยังไม่มีกลุ่ม — สร้างกลุ่มแรกได้เลยครับ</div>';
+      return;
+    }
+
+    wrap.innerHTML = groups.map(g => `
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <div style="flex:1">
+            <div style="font-size:1rem;font-weight:700;color:white">${g.name}</div>
+            <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px;font-family:'Sarabun',sans-serif">
+              ${[g.date, g.round, g.description].filter(Boolean).join(' · ')}
+            </div>
+            <div style="font-size:.7rem;font-family:monospace;color:var(--brand-light);margin-top:4px">${g.groupId}</div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="deleteGroup('${g.groupId}','${g.name}')">🗑️</button>
         </div>
-      </div>`;
-  } else {
-    bestWrap.textContent = 'ยังไม่มีข้อมูล';
-  }
-}
 
-// ─────────────────────────────────────────
-// PLAYERS TABLE
-// ─────────────────────────────────────────
-function filterPlayers() {
-  const search = document.getElementById('search-input').value.toLowerCase();
-  const from   = document.getElementById('date-from').value;
-  const to     = document.getElementById('date-to').value;
-  const status = document.getElementById('status-filter').value;
-
-  let filtered = allPlayers.filter(p => {
-    const matchName = !search || p.displayName.toLowerCase().includes(search);
-    const matchFrom = !from   || new Date(p.lastPlayed) >= new Date(from);
-    const matchTo   = !to     || new Date(p.lastPlayed) <= new Date(to + 'T23:59:59');
-    const matchStat = !status || (p.prizeStatus || 'pending') === status;
-    return matchName && matchFrom && matchTo && matchStat;
-  });
-
-  document.getElementById('player-count').textContent = `${filtered.length} รายการ`;
-  renderPlayersTable(filtered);
-}
-
-function clearFilters() {
-  document.getElementById('search-input').value = '';
-  document.getElementById('date-from').value = '';
-  document.getElementById('date-to').value = '';
-  document.getElementById('status-filter').value = '';
-  filterPlayers();
-}
-
-function renderPlayersTable(players) {
-  const tbody = document.getElementById('players-tbody');
-  if (!players.length) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">ไม่พบรายการ</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = players.map((p, i) => {
-    const rank       = allPlayers.indexOf(p) + 1;
-    const rankClass  = rank===1?'rank-1':rank===2?'rank-2':rank===3?'rank-3':'';
-    const statusBadge = getStatusBadge(p.prizeStatus);
-    const avatar     = avatarHtml(p, 32);
-
-    return `<tr>
-      <td><div class="rank-num ${rankClass}">${rank <= 3 ? ['🥇','🥈','🥉'][rank-1] : rank}</div></td>
-      <td>
-        <div class="player-cell">
-          ${avatar}
-          <div>
-            <div class="player-name-cell">${p.displayName}</div>
-            <div class="user-id-short">...${p.userId.slice(-6)}</div>
+        <!-- URLs -->
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
+          <div style="background:var(--bg2);border-radius:8px;padding:8px 12px">
+            <div style="font-size:.65rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">🎮 ลิงค์เกม</div>
+            <div style="font-size:.72rem;font-family:monospace;color:white;word-break:break-all">${LIFF_URL}?groupId=${g.groupId}</div>
+            <div style="margin-top:6px;display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" onclick="copyText('${LIFF_URL}?groupId=${g.groupId}')">📋 คัดลอก</button>
+              <button class="btn btn-primary btn-sm" onclick="showQR('${LIFF_URL}?groupId=${g.groupId}','${g.name}')">📱 QR Code</button>
+            </div>
+          </div>
+          <div style="background:var(--bg2);border-radius:8px;padding:8px 12px">
+            <div style="font-size:.65rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">🏆 Leaderboard</div>
+            <div style="font-size:.72rem;font-family:monospace;color:white;word-break:break-all">${LB_BASE_URL}?groupId=${g.groupId}</div>
+            <div style="margin-top:6px;display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" onclick="copyText('${LB_BASE_URL}?groupId=${g.groupId}')">📋 คัดลอก</button>
+              <button class="btn btn-success btn-sm" onclick="window.open('${LB_BASE_URL}?groupId=${g.groupId}')">🔗 เปิด</button>
+            </div>
           </div>
         </div>
-      </td>
-      <td><span class="time-val">${formatTime(p.bestTimeMs)}</span></td>
-      <td style="color:var(--text-muted)">${p.playCount}</td>
-      <td style="color:var(--text-muted);font-size:.75rem">${formatDate(p.lastPlayed)}</td>
-      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${p.prizeType?'white':'var(--text-muted)'}">
-        ${p.prizeType || '–'}
-      </td>
-      <td>${statusBadge}</td>
-      <td>
-        <button class="btn btn-warning btn-sm" onclick="openPrizeModal('${p.userId}','${p.displayName}','${p.prizeType||''}','${p.prizeStatus||'pending'}','${p.notes||''}')">
-          ✏️ แก้ไข
-        </button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-function getStatusBadge(status) {
-  switch(status) {
-    case 'shipped':  return '<span class="badge badge-shipped">🚚 จัดส่งแล้ว</span>';
-    case 'received': return '<span class="badge badge-received">✅ รับแล้ว</span>';
-    default:         return '<span class="badge badge-pending">⏳ รอดำเนินการ</span>';
+      </div>
+    `).join('');
   }
-}
 
-// ─────────────────────────────────────────
-// LEADERBOARD
-// ─────────────────────────────────────────
-function renderLeaderboard(entries) {
-  const tbody = document.getElementById('lb-tbody');
-  if (!entries.length) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">ยังไม่มีคะแนน</td></tr>';
-    return;
+  async function createGroup() {
+    const name  = document.getElementById('g-name').value.trim();
+    const round = document.getElementById('g-round').value.trim();
+    const date  = document.getElementById('g-date').value;
+    const desc  = document.getElementById('g-desc').value.trim();
+
+    if (!name) { showToast('กรุณาใส่ชื่อกลุ่ม', 'error'); return; }
+
+    try {
+      const r = await api('createGroup', { name, round, date, description:desc });
+      if (r.success) {
+        showToast('✅ สร้างกลุ่มแล้ว', 'success');
+        document.getElementById('g-name').value  = '';
+        document.getElementById('g-round').value = '';
+        document.getElementById('g-date').value  = '';
+        document.getElementById('g-desc').value  = '';
+        loadGroups();
+      } else {
+        showToast('❌ ' + r.message, 'error');
+      }
+    } catch(e) { showToast('❌ ' + e.message, 'error'); }
   }
-  const medals = ['🥇','🥈','🥉'];
-  tbody.innerHTML = entries.map((e, i) => `
-    <tr>
-      <td><div class="rank-num ${i<3?`rank-${i+1}`:''}">
-        ${i < 3 ? medals[i] : i+1}
-      </div></td>
-      <td>
-        <div class="player-cell">
-          ${avatarHtml(e, 32)}
-          <div class="player-name-cell">${e.displayName}</div>
-        </div>
-      </td>
-      <td><span class="time-val">${formatTime(e.bestTime)}</span></td>
-      <td style="color:var(--text-muted)">${e.playCount}</td>
-      <td style="color:var(--text-muted);font-size:.75rem">${formatDate(e.lastPlayed)}</td>
-    </tr>`).join('');
-}
 
-// ─────────────────────────────────────────
-// PRIZE MODAL
-// ─────────────────────────────────────────
-function openPrizeModal(userId, name, prizeType, prizeStatus, notes) {
-  editingUserId = userId;
-  document.getElementById('modal-player-name').textContent = name;
-  document.getElementById('modal-prize-type').value   = prizeType;
-  document.getElementById('modal-prize-status').value = prizeStatus;
-  document.getElementById('modal-notes').value        = notes;
-  document.getElementById('prize-modal').classList.add('active');
-}
+  async function deleteGroup(groupId, name) {
+    if (!confirm(`ลบกลุ่ม "${name}" ?\nข้อมูลคะแนนในกลุ่มนี้จะยังอยู่ครับ`)) return;
+    const r = await api('deleteGroup', { groupId });
+    r.success ? showToast('✅ ลบกลุ่มแล้ว','success') : showToast('❌ '+r.message,'error');
+    if (r.success) loadGroups();
+  }
 
-function closeModal() {
-  document.getElementById('prize-modal').classList.remove('active');
-}
+  function showQR(url, groupName) {
+    // เปิด popup QR
+    const win = window.open('', '_blank', 'width=400,height=500');
+    win.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>QR — ${groupName}</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+        <style>
+          body{font-family:Kanit,sans-serif;text-align:center;padding:32px;background:#000D33;color:white}
+          h2{color:#FFD700;margin-bottom:4px}
+          p{color:rgba(255,255,255,.6);font-size:.85rem;margin-bottom:24px}
+          #qr{background:white;padding:16px;border-radius:12px;display:inline-block}
+          .url{font-size:.65rem;color:rgba(255,255,255,.4);margin-top:16px;word-break:break-all;font-family:monospace}
+        </style>
+      </head>
+      <body>
+        <h2>🃏 ${groupName}</h2>
+        <p>สแกนเพื่อเข้าเกม</p>
+        <div id="qr"></div>
+        <div class="url">${url}</div>
+        <script>
+          new QRCode(document.getElementById('qr'),{text:'${url}',width:280,height:280,colorDark:'#000000',colorLight:'#ffffff'});
+        <\/script>
+      </body>
+      </html>
+    `);
+  }
 
-async function savePrize() {
-  const prizeType   = document.getElementById('modal-prize-type').value;
-  const prizeStatus = document.getElementById('modal-prize-status').value;
-  const notes       = document.getElementById('modal-notes').value;
-  try {
-    const r = await api('updatePrize', { userId:editingUserId, prizeType, prizeStatus, notes });
-    if (r.success) {
-      showToast('✅ บันทึกแล้ว', 'success');
-      closeModal();
-      loadData();
-    } else {
-      showToast('❌ ' + r.message, 'error');
-    }
-  } catch(e) { showToast('❌ ' + e.message, 'error'); }
-}
-
-// ─────────────────────────────────────────
-// EXPORT CSV
-// ─────────────────────────────────────────
-async function exportCSV() {
-  try {
-    const r = await api('exportCSV');
-    if (!r.success) { showToast('❌ ' + r.message, 'error'); return; }
-    const blob = new Blob(['\ufeff' + r.csv], { type:'text/csv;charset=utf-8' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = `memory-game-${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('✅ Export สำเร็จ', 'success');
-  } catch(e) { showToast('❌ ' + e.message, 'error'); }
-}
-
-// ─────────────────────────────────────────
-// UTILS
-// ─────────────────────────────────────────
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i)=>{
-    t.classList.toggle('active', ['overview','players','leaderboard'][i]===name);
+  function copyText(text) {
+    navigator.clipboard.writeText(text);
+    showToast('📋 คัดลอกแล้ว', 'success');
+  }
+    
+  // Close modal on overlay click
+  document.getElementById('prize-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
   });
-  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-}
-
-async function api(action, extra={}) {
-  const q = new URLSearchParams({ action, pw:PW, ...extra });
-  const r = await fetch(`${API_URL}?${q}`);
-  return r.json();
-}
-
-function avatarHtml(p, size) {
-  const name = p.displayName || p.name || '?';
-  const url  = p.pictureUrl  || p.picture || '';
-  const init = name.slice(0,2).toUpperCase();
-  if (url) return `<img class="player-pic" src="${url}" style="width:${size}px;height:${size}px" onerror="this.outerHTML='<div class=\\'player-pic-fb\\'style=\\'width:${size}px;height:${size}px\\'>${init}</div>'">`;
-  return `<div class="player-pic-fb" style="width:${size}px;height:${size}px">${init}</div>`;
-}
-
-function formatTime(ms) {
-  if (!ms) return '–';
-  const s = Math.floor(ms/1000), m = Math.floor(s/60), sc = s%60, ms2 = Math.floor((ms%1000)/10);
-  if (m>0) return `${m}:${String(sc).padStart(2,'0')}.${String(ms2).padStart(2,'0')}`;
-  return `${String(sc).padStart(2,'0')}.${String(ms2).padStart(2,'0')}`;
-}
-
-function formatDate(d) {
-  if (!d) return '–';
-  try { return new Date(d).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}); }
-  catch { return d; }
-}
-
-function showToast(msg, type='success') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `toast ${type} show`;
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-// Close modal on overlay click
-document.getElementById('prize-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
 </script>
 </body>
 </html>

@@ -512,7 +512,10 @@
 
     async function fetchBestTime() {
       try {
-        const r = await callAPI('getBest', { userId: player.userId });
+        const r = await callAPI('getBest', { 
+          userId:  player.userId,
+          groupId: getGroupId()  // ← เพิ่ม
+        });
         if (r.bestTime) bestTime = r.bestTime;
       } catch(e) { /* ไม่มี record ยังไม่เคยเล่น */ }
     }
@@ -542,7 +545,7 @@
 
       // โหลดอันดับ
       try {
-        const lb = await callAPI('getLeaderboard', {});
+        const lb = await callAPI('getLeaderboard', { groupId: getGroupId() });
         const entries = lb.entries || [];
         if (entries.length > 0) {
           document.getElementById('rank1-name').textContent = entries[0].displayName;
@@ -748,12 +751,13 @@
           userId:      player.userId,
           displayName: player.displayName,
           pictureUrl:  player.pictureUrl || '',
-          timeMs:      elapsed
+          timeMs:      elapsed,
+          groupId:     getGroupId()  // ← เพิ่ม
         });
       } catch(e) { console.warn('Save failed:', e); }
 
       try {
-        const lb = await callAPI('getLeaderboard', {});
+        const lb = await callAPI('getLeaderboard', { groupId: getGroupId() });
         renderLeaderboard(lb.entries || []);
       } catch(e) {
         document.getElementById('lb-list').innerHTML = '<div class="lb-empty">ไม่สามารถโหลด Leaderboard ได้</div>';
@@ -825,6 +829,11 @@
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
     }
+
+    function getGroupId() {
+      return new URLSearchParams(window.location.search).get('groupId') || 'default';
+    }
+
   </script>
 </body>
 </html>

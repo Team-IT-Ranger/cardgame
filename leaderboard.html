@@ -136,7 +136,8 @@
 
       async function load() {
         try {
-          const r = await fetch(`${API_URL}?action=getLeaderboard`);
+          const groupId = new URLSearchParams(window.location.search).get('groupId') || 'default';
+          const r = await fetch(`${API_URL}?action=getLeaderboard&groupId=${groupId}`);
           const text = await r.text();
           const d = JSON.parse(text);
 
